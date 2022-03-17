@@ -21,6 +21,7 @@ public class TradingDataVO {
 
     private int holdingAmount;
 
+    private Long cash;
     private Long capital;
 
     public TradingDataVO(TradingData data) {
@@ -32,7 +33,8 @@ public class TradingDataVO {
         this.takeProfitPoint = data.getTakeProfitPoint();
         this.stopLossPoint = data.getStopLossPoint();
         this.holdingAmount = data.getHoldingAmount();
-        this.capital = data.getCapital();
+        this.cash = data.getCash();
+        this.capital = cash + data.getHoldingAmount() * data.getStockInfo().getCurrentPrice();
     }
 
     public static List<TradingDataVO> transformList(List<TradingData> dataList) {

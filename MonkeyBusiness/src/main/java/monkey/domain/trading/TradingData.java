@@ -3,7 +3,6 @@ package monkey.domain.trading;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import monkey.domain.user.User;
 
 import javax.persistence.*;
 
@@ -26,7 +25,7 @@ public class TradingData {
 
     private int holdingAmount;
 
-    private Long capital;
+    private Long cash;
 
     @Builder
     public TradingData(Long id, StockInfo stockInfo, TradingStrategy strategy) {
@@ -36,7 +35,7 @@ public class TradingData {
         this.takeProfitPoint = strategy.getTakeProfitPoint();
         this.stopLossPoint = strategy.getStopLossPoint();
         this.holdingAmount = 0;
-        this.capital = 1000000L;
+        this.cash = 1000000L;
     }
 
     public void updateStrategy(TradingStrategy strategy) {
@@ -62,7 +61,7 @@ public class TradingData {
                 .sellingPrice(this.stockInfo.getCurrentPrice())
                 .build();
 
-        this.capital += (long) holdingAmount * this.stockInfo.getCurrentPrice();
+        this.cash += (long) holdingAmount * this.stockInfo.getCurrentPrice();
         this.holdingAmount = 0;
 
         return newLogDto;
@@ -71,8 +70,8 @@ public class TradingData {
     public TradingLogDto buyingStocks(StockInfo stockInfo) {
         this.stockInfo = stockInfo;
         this.buyingPrice = stockInfo.getCurrentPrice();
-        this.holdingAmount = (int)(this.capital / this.buyingPrice);
-        this.capital -= (long) holdingAmount * this.buyingPrice;
+        this.holdingAmount = (int)(this.cash / this.buyingPrice);
+        this.cash -= (long) holdingAmount * this.buyingPrice;
 
         TradingLogDto newLogDto = TradingLogDto.builder()
                 .amount(this.holdingAmount)

@@ -29,6 +29,8 @@ public class TradingLog {
 
     private int amount;
 
+    private Long profit;
+
     private LocalDateTime createdTime;
 
     public TradingLog(Long userId, TradingLogDto logDto) {
@@ -38,6 +40,7 @@ public class TradingLog {
         this.buyingPrice = logDto.getBuyingPrice();
         this.sellingPrice = logDto.getSellingPrice();
         this.amount = logDto.getAmount();
+        this.profit = logDto.isBuying() ? 0 : ((long)logDto.getSellingPrice() - logDto.getBuyingPrice()) * logDto.getAmount();
         this.createdTime = LocalDateTime.now();
     }
 }
