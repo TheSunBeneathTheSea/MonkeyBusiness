@@ -1,8 +1,6 @@
 import requests
 from apscheduler.schedulers.background import BlockingScheduler
 from bs4 import BeautifulSoup
-from multiprocessing import Pool
-import time
 import os
 import pandas as pd
 
@@ -17,10 +15,7 @@ def get_page(code):
     bs_obj = BeautifulSoup(result.content.decode('euc-kr', 'replace'), "lxml")
     return [bs_obj.select_one('p.no_today').text.strip().split()[0].replace(',', '')]
 
-        
-if __name__ == '__main__':
-    sched = BlockingScheduler
-    start = time.time()
+def crawl():
     company_list = []
     result_list = []
 
@@ -41,4 +36,9 @@ if __name__ == '__main__':
     df.to_json('C:/crawled/data/price_now.json',
                orient='records', force_ascii=False)
 
-    print("timelapse : ", time.time() - start)
+sched = BlockingScheduler()               
+    
+sched.add_job(crawl, trigger='cron', second='0', minute='0/5', hour='9-14', day_of_week='mon-fri', month="*")    
+sched.add_job(crawl, trigger='cron', second='0', minute='1-26/5', hour='15', day_of_week='mon-fri', month="*")
+
+sched.start()
