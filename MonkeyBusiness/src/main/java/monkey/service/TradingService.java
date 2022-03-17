@@ -103,8 +103,19 @@ public class TradingService {
     public List<TradingData> showTradingData() {
         return tradingDataRepository.findAll();
     }
+
+    @Transactional
+    public TradingData showTradingDataOfId(Long id) {
+        return tradingDataRepository.getById(id);
+    }
+
     @Transactional
     public List<TradingLog> showLogs() {
         return tradingLogRepository.findAllDesc();
+    }
+
+    @Transactional
+    public List<TradingLog> showLogsOfUserByUserId(Long id) {
+        return tradingLogRepository.findAllByUserIdDesc(id);
     }
 }

@@ -11,10 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -57,8 +54,18 @@ public class TradingController {
         return ResponseEntity.status(HttpStatus.OK).body(TradingDataVO.transformList(tradingService.showTradingData()));
     }
 
+    @GetMapping("/api/v1/trading/{id}")
+    public ResponseEntity<TradingDataVO> showTradingData(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(new TradingDataVO(tradingService.showTradingDataOfId(id)));
+    }
+
     @GetMapping("/api/v1/logs")
     public ResponseEntity<List<TradingLog>> showLogs() {
         return ResponseEntity.status(HttpStatus.OK).body(tradingService.showLogs());
+    }
+
+    @GetMapping("/api/v1/logs/{id}")
+    public ResponseEntity<List<TradingLog>> showUserLogs(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(tradingService.showLogsOfUserByUserId(id));
     }
 }
