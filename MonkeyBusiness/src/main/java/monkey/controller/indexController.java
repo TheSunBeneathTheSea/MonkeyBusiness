@@ -2,6 +2,7 @@ package monkey.controller;
 
 import lombok.RequiredArgsConstructor;
 import monkey.domain.trading.StockInfo;
+import monkey.domain.trading.StockInfoVO;
 import monkey.service.StockUpdateService;
 import monkey.service.TradingService;
 import monkey.service.UserService;
@@ -22,9 +23,7 @@ public class indexController {
     private final StockUpdateService stockUpdateService;
 
     @GetMapping("/api/v1/stock")
-    public ResponseEntity<List<StockInfo>> findAllStock() throws IOException {
-        List<StockInfo> stockInfoList = stockUpdateService.findAllStockInfoAsc();
-
-        return ResponseEntity.status(HttpStatus.OK).body(stockInfoList);
+    public ResponseEntity<List<StockInfoVO>> showStockInfoNow() {
+        return ResponseEntity.status(HttpStatus.OK).body(StockInfoVO.transformList(stockUpdateService.findAllStockInfoAsc()));
     }
 }

@@ -1,10 +1,7 @@
 package monkey.controller;
 
 import lombok.RequiredArgsConstructor;
-import monkey.domain.trading.TradingData;
-import monkey.domain.trading.TradingDataSaveRequestDto;
-import monkey.domain.trading.TradingDataVO;
-import monkey.domain.trading.TradingLog;
+import monkey.domain.trading.*;
 import monkey.service.StockUpdateService;
 import monkey.service.TradingService;
 import org.springframework.http.HttpStatus;
@@ -16,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 @Controller
 public class TradingController {
