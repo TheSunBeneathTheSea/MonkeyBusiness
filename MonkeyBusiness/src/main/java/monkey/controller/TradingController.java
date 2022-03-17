@@ -15,7 +15,7 @@ import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
-@Controller
+@RestController
 public class TradingController {
     private final TradingService tradingService;
     private final StockUpdateService stockUpdateService;
