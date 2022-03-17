@@ -1,5 +1,4 @@
 import requests
-import csv
 from apscheduler.schedulers.background import BlockingScheduler
 from bs4 import BeautifulSoup
 from multiprocessing import Pool
@@ -25,12 +24,9 @@ if __name__ == '__main__':
     company_list = []
     result_list = []
 
-    file = open('./data/kospi200.csv', 'r', encoding='UTF8')
-    reader = csv.reader(file)
+    file = pd.read_excel('./data/kospi200.xlsx', usecols="A:B", dtype=str)
 
-    for line in reader:
-        if reader.line_num == 1:
-            continue
+    for line in file.itertuples(index=False):
         company_list.append([line[0], line[1]])
 
     for company in company_list:
