@@ -26,12 +26,8 @@ public class TradingService {
                 .takeProfitPoint(saveRequestDto.getTakeProfitPoint())
                 .stopLossPoint(saveRequestDto.getStopLossPoint()).build();
 
-        List<StockInfo> stockInfoList = stockInfoRepository.findAll();
-        StockInfo randomInitialTarget = stockInfoList.get((int)(Math.random() * stockInfoList.size()));
-
         TradingData tradingData = TradingData.builder()
                 .id(user.getId())
-                .stockInfo(randomInitialTarget)
                 .strategy(strategy)
                 .build();
 

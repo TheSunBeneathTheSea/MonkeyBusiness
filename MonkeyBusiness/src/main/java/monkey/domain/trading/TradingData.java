@@ -13,7 +13,7 @@ public class TradingData {
     @Id
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "stock_info_ticker")
     private StockInfo stockInfo;
 
