@@ -43,17 +43,21 @@ def crawl():
     df = pd.DataFrame(list(result_list), columns=['ticker', 'companyName', 'currentPrice'])
     print(df)
 
-    path = 'C:/crawled/data'
-    os.makedirs(path, exist_ok=True)
+    file_path = 'C:/crawled/data/price_now.json'
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    else:
+        os.makedirs(file_path, exist_ok=True)
 
-    df.to_json(r'C:/crawled/data/price_now.json',
+    df.to_json(file_path,
                orient='records', force_ascii=False)
     print("timelapse : ", time.time() - start)
 
 if __name__ == "__main__":
-    sched = BlockingScheduler()               
+    # sched = BlockingScheduler()               
         
-    sched.add_job(crawl, trigger='cron', second='0', minute='0/2', hour='9-14', day_of_week='mon-fri', month="*")    
-    sched.add_job(crawl, trigger='cron', second='0', minute='0-24/2', hour='15', day_of_week='mon-fri', month="*")
+    # sched.add_job(crawl, trigger='cron', second='0', minute='0/2', hour='9-14', day_of_week='mon-fri', month="*")    
+    # sched.add_job(crawl, trigger='cron', second='0', minute='0-24/2', hour='15', day_of_week='mon-fri', month="*")
 
-    sched.start()
+    # sched.start()
+    crawl()
