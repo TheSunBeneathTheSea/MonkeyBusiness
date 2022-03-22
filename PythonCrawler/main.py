@@ -54,10 +54,9 @@ def crawl():
     print("timelapse : ", time.time() - start)
 
 if __name__ == "__main__":
-    # sched = BlockingScheduler()               
+    sched = BlockingScheduler()               
         
-    # sched.add_job(crawl, trigger='cron', second='0', minute='0/2', hour='9-14', day_of_week='mon-fri', month="*")    
-    # sched.add_job(crawl, trigger='cron', second='0', minute='0-24/2', hour='15', day_of_week='mon-fri', month="*")
+    sched.add_job(crawl, trigger='cron', second='0', minute='0/2', hour='9-14', day_of_week='mon-fri', month="*")    
+    sched.add_job(crawl, trigger='cron', second='0', minute='0-24/2', hour='15', day_of_week='mon-fri', month="*")
 
-    # sched.start()
-    crawl()
+    sched.start()
