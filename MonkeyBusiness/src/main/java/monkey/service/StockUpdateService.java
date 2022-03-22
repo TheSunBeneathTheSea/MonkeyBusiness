@@ -64,6 +64,9 @@ public class StockUpdateService {
                throw new IOException("stockinfo size: " + infoList.size() + " != updateDto size: " + updateDtoMap.size() + "does not match");
             }
         }
+        if(isOpening){
+            return "stock update complete";
+        }
 
         for (int i = 0; i < infoList.size(); i++) {
             StockInfo info = infoList.get(i);
