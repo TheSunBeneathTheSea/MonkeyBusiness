@@ -7,7 +7,7 @@ import monkey.service.TradingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Controller;
+import org.springframework.scheduling.annotation.Schedules;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -20,50 +20,48 @@ public class TradingController {
     private final TradingService tradingService;
     private final StockUpdateService stockUpdateService;
 
-    @Scheduled(cron = "0 2 9 ? * 1-5")
-    public void openMarket() throws IOException {
+    @Scheduled(cron = "15 0 9 ? * 1-5")
+    public void openMarket() throws IOException, Exception {
         stockUpdateService.updateStocks(true);
         tradingService.checkProfit();
     }
 
-    //    @Schedules({
-//            @Scheduled(cron = "0 6/5 9-14 ? * 1-5"),
-//            @Scheduled(cron = "0 1-26/1 15 ? * 1-5")
-//    })
-    // 테스트용 스케줄링
-    @Scheduled(cron = "0 0/2 * * * *")
-    public void updateStock() throws IOException {
+    @Schedules({
+            @Scheduled(cron = "15 0/2 9-14 ? * 1-5"),
+            @Scheduled(cron = "15 0-30/2 15 ? * 1-5")
+    })
+    public void updateStock() throws IOException, Exception {
         stockUpdateService.updateStocks(false);
         tradingService.checkProfit();
     }
 
     @PostMapping("/api/v1/trading")
-    public String saveStrategy(@RequestBody TradingDataSaveRequestDto saveRequestDto) {
-        return tradingService.makeStrategy(saveRequestDto);
+    public String saveStrategy(@RequestBody AccountSaveRequestDto saveRequestDto) throws Exception {
+        return tradingService.setStrategy(saveRequestDto);
     }
 
     @PutMapping("/api/v1/trading")
-    public String editStrategy(@RequestBody TradingDataSaveRequestDto saveRequestDto) {
-        return tradingService.adjustStrategy(saveRequestDto);
+    public String editStrategy(@RequestBody AccountSaveRequestDto saveRequestDto) throws Exception {
+        return tradingService.setStrategy(saveRequestDto);
     }
 
-    @GetMapping("/api/v1/trading")
-    public ResponseEntity<List<TradingDataVO>> showTradingData() {
-        return ResponseEntity.status(HttpStatus.OK).body(TradingDataVO.transformList(tradingService.showTradingData()));
+    @GetMapping("/api/v1/account")
+    public ResponseEntity<List<AccountVO>> showAccounts() {
+        return ResponseEntity.status(HttpStatus.OK).body(AccountVO.transformList(tradingService.showTradingData()));
     }
 
-    @GetMapping("/api/v1/trading/{id}")
-    public ResponseEntity<TradingDataVO> showTradingData(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(new TradingDataVO(tradingService.showTradingDataOfId(id)));
+    @GetMapping("/api/v1/account/{id}")
+    public ResponseEntity<AccountVO> showAccountById(@PathVariable String user_id) {
+        return ResponseEntity.status(HttpStatus.OK).body(new AccountVO(tradingService.showTradingDataOfId(user_id)));
     }
 
     @GetMapping("/api/v1/logs")
-    public ResponseEntity<List<TradingLog>> showLogs() {
-        return ResponseEntity.status(HttpStatus.OK).body(tradingService.showLogs());
+    public ResponseEntity<List<TradingLogVO>> showLogs() {
+        return ResponseEntity.status(HttpStatus.OK).body(TradingLogVO.transformList(tradingService.showLogs()));
     }
 
     @GetMapping("/api/v1/logs/{id}")
-    public ResponseEntity<List<TradingLog>> showUserLogs(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(tradingService.showLogsOfUserByUserId(id));
+    public ResponseEntity<List<TradingLogVO>> showAccountLogs(@PathVariable String user_id) {
+        return ResponseEntity.status(HttpStatus.OK).body(TradingLogVO.transformList(tradingService.showLogsOfUserByUserId(user_id)));
     }
 }

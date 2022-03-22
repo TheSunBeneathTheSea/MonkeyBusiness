@@ -10,5 +10,5 @@ public interface TradingLogRepository extends JpaRepository<TradingLog, Long> {
     List<TradingLog> findAllDesc();
 
     @Query("SELECT l FROM TradingLog l WHERE user_id = ?1 ORDER BY l.id DESC")
-    List<TradingLog> findAllByUserIdDesc(Long userId);
+    List<TradingLog> findAllByUserIdDesc(String userId);
 }

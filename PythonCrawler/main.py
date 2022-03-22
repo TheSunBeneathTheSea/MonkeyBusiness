@@ -1,5 +1,5 @@
 import requests
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.background import BlockingScheduler
 from bs4 import BeautifulSoup
 import time
 import os
@@ -38,7 +38,7 @@ def crawl():
     get_info()
 
     for info in sise:
-        result_list.append([company_dict[info[0]], info[0], info[1]])
+        result_list.append([company_dict[info[0]], info[0], info[1].replace(",", "")])
 
     df = pd.DataFrame(list(result_list), columns=['ticker', 'companyName', 'currentPrice'])
     print(df)
@@ -46,12 +46,12 @@ def crawl():
     path = 'C:/crawled/data'
     os.makedirs(path, exist_ok=True)
 
-    df.to_json('C:/crawled/data/price_now.json',
+    df.to_json(r'C:/crawled/data/price_now.json',
                orient='records', force_ascii=False)
     print("timelapse : ", time.time() - start)
 
 if __name__ == "__main__":
-    sched = BackgroundScheduler()               
+    sched = BlockingScheduler()               
         
     sched.add_job(crawl, trigger='cron', second='0', minute='0/2', hour='9-14', day_of_week='mon-fri', month="*")    
     sched.add_job(crawl, trigger='cron', second='0', minute='0-24/2', hour='15', day_of_week='mon-fri', month="*")

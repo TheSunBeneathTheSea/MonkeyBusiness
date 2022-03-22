@@ -2,10 +2,9 @@ package monkey.service;
 
 import lombok.RequiredArgsConstructor;
 import monkey.domain.trading.*;
-import monkey.domain.user.User;
-import monkey.domain.user.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -13,96 +12,78 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 @Service
 public class TradingService {
-    private final UserRepository userRepository;
-    private final TradingDataRepository tradingDataRepository;
+    private final AccountRepository accountRepository;
     private final TradingLogRepository tradingLogRepository;
     private final StockInfoRepository stockInfoRepository;
 
     @Transactional
-    public String makeStrategy(TradingDataSaveRequestDto saveRequestDto) {
-        User user = userRepository.findById(saveRequestDto.getUserId()).orElseThrow(() -> new NoSuchElementException("no such user id: " + saveRequestDto.getUserId()));
-
+    public String setStrategy(AccountSaveRequestDto saveRequestDto) throws Exception {
         TradingStrategy strategy = TradingStrategy.builder()
                 .takeProfitPoint(saveRequestDto.getTakeProfitPoint())
                 .stopLossPoint(saveRequestDto.getStopLossPoint()).build();
 
-        TradingData tradingData = TradingData.builder()
-                .id(user.getId())
-                .strategy(strategy)
-                .build();
+        Account account = accountRepository.getById(saveRequestDto.getUser_id());
 
-        tradingDataRepository.save(tradingData);
+        account.updateStrategy(strategy);
 
-        buyingStocks(user.getId());
+        if(ObjectUtils.isEmpty(account.getStockInfo())){
+            buyingStocks(account.getUser_id());
+        }
 
-        return "make profile: " + user.getId();
+        return "edit profile: " + account.getUser_id();
     }
 
     @Transactional
-    public String adjustStrategy(TradingDataSaveRequestDto saveRequestDto) {
-        TradingStrategy strategy = TradingStrategy.builder()
-                .takeProfitPoint(saveRequestDto.getTakeProfitPoint())
-                .stopLossPoint(saveRequestDto.getStopLossPoint()).build();
+    public String buyingStocks(String user_id) throws Exception {
+        Account account = accountRepository.findById(user_id).orElseThrow(() -> new NoSuchElementException("no such data id: " + user_id));
 
-        TradingData tradingData = tradingDataRepository.getById(saveRequestDto.getUserId());
-
-        tradingData.updateStrategy(strategy);
-
-        return "update strategy of user: " + saveRequestDto.getUserId();
-    }
-
-    @Transactional
-    public String buyingStocks(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("no such user id: " + userId));
-        TradingData tradingData = tradingDataRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("no such data id: " + userId));
         List<StockInfo> stockInfoList = stockInfoRepository.findAll();
 
         StockInfo randomTarget = stockInfoList.get((int)(Math.random() * stockInfoList.size()));
 
-        TradingLogDto newLogDto = tradingData.buyingStocks(randomTarget);
-        TradingLog newLog = new TradingLog(user.getId(), newLogDto);
+        TradingLogDto newLogDto = account.buyingStocks(randomTarget).orElseThrow(() -> new NullPointerException("cannot afford points"));
+        TradingLog newLog = new TradingLog(account, newLogDto);
 
         tradingLogRepository.save(newLog);
 
-        return userId + ": " + randomTarget.getTicker() + " Buy";
+        return user_id + ": " + randomTarget.getTicker() + " Buy";
     }
 
     @Transactional
-    public String sellingStocks(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("no such user id: " + userId));
-        TradingData tradingData = tradingDataRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("no such data id: " + userId));
+    public String sellingStocks(String user_id) {
+        Account account = accountRepository.findById(user_id).orElseThrow(() -> new NoSuchElementException("no such account id: " + user_id));
 
-        TradingLogDto newLogDto = tradingData.sellingStocks();
+        TradingLogDto newLogDto = account.sellingStocks();
 
-        tradingLogRepository.save(new TradingLog(user.getId(), newLogDto));
+        tradingLogRepository.save(new TradingLog(account, newLogDto));
 
-        return userId + ": " + newLogDto.getTicker() + " Sell";
+        return account.getUser_id() + ": " + newLogDto.getTicker() + " Sell";
     }
 
     @Transactional
-    public String checkProfit() {
-        List<TradingData> tradingDataList = tradingDataRepository.findAll();
+    public String checkProfit() throws Exception {
+        List<Account> accountList = accountRepository.findAll();
 
-        for (TradingData data : tradingDataList) {
-            if (!data.makeDecision()) {
+        for (Account account : accountList) {
+            if (!account.makeDecision()) {
                 continue;
             }
 
-            sellingStocks(data.getId());
-            buyingStocks(data.getId());
+            sellingStocks(account.getUser_id());
+            buyingStocks(account.getUser_id());
         }
 
         return "checked";
     }
 
     @Transactional
-    public List<TradingData> showTradingData() {
-        return tradingDataRepository.findAll();
+    public List<Account> showTradingData() {
+        return accountRepository.findAll();
     }
 
     @Transactional
-    public TradingData showTradingDataOfId(Long id) {
-        return tradingDataRepository.getById(id);
+    public Account showTradingDataOfId(String user_id) {
+        return accountRepository.getById(user_id);
     }
 
     @Transactional
@@ -111,7 +92,7 @@ public class TradingService {
     }
 
     @Transactional
-    public List<TradingLog> showLogsOfUserByUserId(Long id) {
-        return tradingLogRepository.findAllByUserIdDesc(id);
+    public List<TradingLog> showLogsOfUserByUserId(String user_id) {
+        return tradingLogRepository.findAllByUserIdDesc(user_id);
     }
 }

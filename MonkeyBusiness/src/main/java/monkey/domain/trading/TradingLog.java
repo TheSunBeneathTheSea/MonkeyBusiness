@@ -1,9 +1,7 @@
 package monkey.domain.trading;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import monkey.domain.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -16,7 +14,9 @@ public class TradingLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "Account_user_id", columnDefinition = "char(36) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL")
+    private Account account;
 
     @Column(nullable = false)
     private boolean isBuying;
@@ -33,8 +33,8 @@ public class TradingLog {
 
     private LocalDateTime createdTime;
 
-    public TradingLog(Long userId, TradingLogDto logDto) {
-        this.userId = userId;
+    public TradingLog(Account account, TradingLogDto logDto) {
+        this.account = account;
         this.isBuying = logDto.isBuying();
         this.ticker = logDto.getTicker();
         this.buyingPrice = logDto.getBuyingPrice();

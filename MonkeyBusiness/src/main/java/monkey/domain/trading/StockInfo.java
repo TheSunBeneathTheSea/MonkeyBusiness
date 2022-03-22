@@ -20,8 +20,8 @@ public class StockInfo {
 
     private int currentPrice;
 
-    @OneToMany(mappedBy = "stockInfo", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<TradingData> tradingDataList;
+    @OneToMany(mappedBy = "stockInfo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Account> accountList;
 
     @Builder
     public StockInfo(String ticker, String companyName, int currentPrice){

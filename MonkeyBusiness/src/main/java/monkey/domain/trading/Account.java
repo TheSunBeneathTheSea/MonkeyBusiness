@@ -5,37 +5,47 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Getter
 @NoArgsConstructor
 @Entity
-public class TradingData {
+@Table(name = "`Account`")
+public class Account {
+    @Column(columnDefinition = "char(36)")
     @Id
+    private String user_id;
+
+    @Column(unique = true, columnDefinition = "not null auto_increment")
     private Long id;
+
+    @Column(columnDefinition = "default 10000")
+    private Long points;
+
+    private int buyingPrice;
+
+    private int takeProfitPoint;
+
+    private int stopLossPoint;
+
+    private int holdingAmount;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "stock_info_ticker")
     private StockInfo stockInfo;
 
-    private int buyingPrice;
-
-    private short takeProfitPoint;
-
-    private short stopLossPoint;
-
-    private int holdingAmount;
-
-    private Long cash;
-
     @Builder
-    public TradingData(Long id, StockInfo stockInfo, TradingStrategy strategy) {
-        this.id = id;
-        this.stockInfo = stockInfo;
+    public Account(String user_id, TradingStrategy strategy) {
+        this.user_id = user_id;
         this.buyingPrice = 0;
         this.takeProfitPoint = strategy.getTakeProfitPoint();
         this.stopLossPoint = strategy.getStopLossPoint();
         this.holdingAmount = 0;
-        this.cash = 1000000L;
     }
 
     public void updateStrategy(TradingStrategy strategy) {
@@ -61,17 +71,24 @@ public class TradingData {
                 .sellingPrice(this.stockInfo.getCurrentPrice())
                 .build();
 
-        this.cash += (long) holdingAmount * this.stockInfo.getCurrentPrice();
+        this.points += (long) holdingAmount * this.stockInfo.getCurrentPrice();
         this.holdingAmount = 0;
 
         return newLogDto;
     }
 
-    public TradingLogDto buyingStocks(StockInfo stockInfo) {
+    public boolean canBuy(StockInfo stockInfo){
+        return this.points >= stockInfo.getCurrentPrice();
+    }
+
+    public Optional<TradingLogDto> buyingStocks(StockInfo stockInfo) throws Exception {
+        if(!canBuy(stockInfo)){
+            return null;
+        }
         this.stockInfo = stockInfo;
         this.buyingPrice = stockInfo.getCurrentPrice();
-        this.holdingAmount = (int)(this.cash / this.buyingPrice);
-        this.cash -= (long) holdingAmount * this.buyingPrice;
+        this.holdingAmount = (int)(this.points / this.buyingPrice);
+        this.points -= (long) holdingAmount * this.buyingPrice;
 
         TradingLogDto newLogDto = TradingLogDto.builder()
                 .amount(this.holdingAmount)
@@ -81,6 +98,6 @@ public class TradingData {
                 .sellingPrice(0)
                 .build();
 
-        return newLogDto;
+        return Optional.of(newLogDto);
     }
 }

@@ -3,8 +3,8 @@ package monkey.domain.trading;
 import lombok.Data;
 
 @Data
-public class TradingDataSaveRequestDto {
-    private Long userId;
+public class AccountSaveRequestDto {
+    private String user_id;
     private short takeProfitPoint;
     private short stopLossPoint;
 }
