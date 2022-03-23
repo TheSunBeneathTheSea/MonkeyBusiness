@@ -67,6 +67,7 @@ public class Account {
                 .amount(this.holdingAmount)
                 .isBuying(false)
                 .ticker(this.stockInfo.getTicker())
+                .companyName(this.stockInfo.getCompanyName())
                 .buyingPrice(getBuyingPrice())
                 .sellingPrice(this.stockInfo.getCurrentPrice())
                 .build();
@@ -94,6 +95,7 @@ public class Account {
                 .amount(this.holdingAmount)
                 .isBuying(true)
                 .ticker(stockInfo.getTicker())
+                .companyName(this.stockInfo.getCompanyName())
                 .buyingPrice(this.buyingPrice)
                 .sellingPrice(0)
                 .build();

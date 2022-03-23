@@ -16,6 +16,8 @@ public class TradingLogVO {
 
     private String ticker;
 
+    private String companyName;
+
     private int buyingPrice;
 
     private int sellingPrice;
@@ -31,6 +33,7 @@ public class TradingLogVO {
         this.user_id = tradingLog.getAccount().getUser_id();
         this.isBuying = tradingLog.isBuying();
         this.ticker = tradingLog.getTicker();
+        this.companyName = tradingLog.getCompanyName();
         this.buyingPrice = tradingLog.getBuyingPrice();
         this.sellingPrice = tradingLog.getSellingPrice();
         this.amount = tradingLog.getAmount();

@@ -35,12 +35,12 @@ public class TradingController {
         tradingService.checkProfit();
     }
 
-    @PostMapping("/api/v1/trading")
+    @PostMapping("/api/v1/account")
     public String saveStrategy(@RequestBody AccountSaveRequestDto saveRequestDto) throws Exception {
         return tradingService.setStrategy(saveRequestDto);
     }
 
-    @PutMapping("/api/v1/trading")
+    @PutMapping("/api/v1/account")
     public String editStrategy(@RequestBody AccountSaveRequestDto saveRequestDto) throws Exception {
         return tradingService.setStrategy(saveRequestDto);
     }
@@ -50,7 +50,7 @@ public class TradingController {
         return ResponseEntity.status(HttpStatus.OK).body(AccountVO.transformList(tradingService.showTradingData()));
     }
 
-    @GetMapping("/api/v1/account/{id}")
+    @GetMapping("/api/v1/account/{user_id}")
     public ResponseEntity<AccountVO> showAccountById(@PathVariable String user_id) {
         return ResponseEntity.status(HttpStatus.OK).body(new AccountVO(tradingService.showTradingDataOfId(user_id)));
     }
@@ -60,7 +60,7 @@ public class TradingController {
         return ResponseEntity.status(HttpStatus.OK).body(TradingLogVO.transformList(tradingService.showLogs()));
     }
 
-    @GetMapping("/api/v1/logs/{id}")
+    @GetMapping("/api/v1/logs/{user_id}")
     public ResponseEntity<List<TradingLogVO>> showAccountLogs(@PathVariable String user_id) {
         return ResponseEntity.status(HttpStatus.OK).body(TradingLogVO.transformList(tradingService.showLogsOfUserByUserId(user_id)));
     }

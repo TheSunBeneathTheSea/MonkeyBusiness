@@ -11,6 +11,8 @@ public class TradingLogDto {
 
     private String ticker;
 
+    private String companyName;
+
     private int buyingPrice;
 
     private int sellingPrice;
@@ -18,9 +20,10 @@ public class TradingLogDto {
     private int amount;
 
     @Builder
-    public TradingLogDto(int buyingPrice, int sellingPrice, boolean isBuying, String ticker, int amount) {
+    public TradingLogDto(int buyingPrice, int sellingPrice, boolean isBuying, String ticker, String companyName, int amount) {
         this.isBuying = isBuying;
         this.ticker = ticker;
+        this.companyName = companyName;
         this.buyingPrice = buyingPrice;
         this.sellingPrice = sellingPrice;
         this.amount = amount;
