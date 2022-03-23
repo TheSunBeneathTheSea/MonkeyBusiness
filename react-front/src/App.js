@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NavBar from "./components/Navbar";
 import Footer from "./components/Footer";
-import Trading from "./views/Trading";
+import Account from "./views/Account";
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
       <NavBar />
       {/* <NavBar istrue={istrue}/> */}
       <Routes>
-        <Route path="/trading/" exact={true} element={<Trading />} />
+        <Route path="/account/*" element={<Account />} />
       </Routes>
 
       <Footer />

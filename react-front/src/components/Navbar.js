@@ -10,7 +10,7 @@ const Navbar = () => {
         <h1>Monkeystock</h1>
       </Logo>
       <Menu>
-        <Box to="/trading">모의투자</Box>
+        <Box to="/account">모의투자</Box>
         <Box to="/community">커뮤니티</Box>
         <Box to="/">상담문의</Box>
       </Menu>

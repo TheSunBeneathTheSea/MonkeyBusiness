@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import axios from "axios";
 import styled from "styled-components/macro";
 
-const Strategy = ({ data, getData }) => {
-  const back = "http://localhost:8080";
-  const dataAPI = back + "/api/v1/trading";
+const Strategy = ({ account, getAccount }) => {
+  const back = "http://localhost:8080/api/v1/account/";
+  const accountAPI = back + account.user_id;
   const [strategy, setStrategy] = useState({});
 
   const handleChange = (event) => {
@@ -16,28 +16,27 @@ const Strategy = ({ data, getData }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    await axios.put(dataAPI, strategy).catch((err) => {
-      alert(err);
-    });
-    getData(dataAPI);
+    let strategyRequest = { ...strategy, user_id: account.user_id };
+
+    await axios
+      .put(back, strategyRequest)
+      .then((response) => {
+        alert("Edit strategy successfully!");
+      })
+      .catch((err) => {
+        alert(err);
+      });
+    getAccount(accountAPI);
   };
 
   return (
     <Container>
       <h2>전략</h2>
+      <p>현재 익절 시점 : {account.takeProfitPoint}</p>
+      <p>현재 손절 시점 : {account.stopLossPoint}</p>
       <br />
       <div>
         <form id="strategy" onSubmit={handleSubmit}>
-          <select id="id" name="userId" onChange={handleChange}>
-            <option value="">User ID</option>
-            {/* User db 연결되면 user 데이터를 받아와서 id를 사용 */}
-            {data.map((data) => (
-              <option value={data.id} key={data.id}>
-                {data.id}
-              </option>
-            ))}
-            ;
-          </select>
           <br />
           <label htmlFor="profitPoint">익절 시점(%)</label>
           <input
