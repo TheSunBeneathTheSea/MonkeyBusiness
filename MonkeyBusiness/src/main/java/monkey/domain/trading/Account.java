@@ -5,75 +5,44 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Set;
 
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "`Account`")
 public class Account {
-    @Column(columnDefinition = "char(36)")
     @Id
     private String user_id;
 
-    @Column(unique = true, columnDefinition = "not null auto_increment")
-    private Long id;
-
-    @Column(columnDefinition = "default 10000")
     private Long points;
 
-    private int buyingPrice;
-
-    private int takeProfitPoint;
-
-    private int stopLossPoint;
-
-    private int holdingAmount;
-
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private LocalDateTime deletedAt;
-
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "stock_info_ticker")
-    private StockInfo stockInfo;
+    @OneToMany(mappedBy = "owner")
+    private Set<Portfolio> holdingStocks;
 
     @Builder
-    public Account(String user_id, TradingStrategy strategy) {
+    public Account(String user_id) {
         this.user_id = user_id;
-        this.buyingPrice = 0;
-        this.takeProfitPoint = strategy.getTakeProfitPoint();
-        this.stopLossPoint = strategy.getStopLossPoint();
-        this.holdingAmount = 0;
+        this.points = 1000000L;
     }
 
-    public void updateStrategy(TradingStrategy strategy) {
-        this.takeProfitPoint = strategy.getTakeProfitPoint();
-        this.stopLossPoint = strategy.getStopLossPoint();
-    }
+    public TradingLogDto sellingStocks(TradeRequestDto requestDto) throws NullPointerException {
+        Portfolio portfolio = requestDto.getPortfolio();
+        StockInfo stock = portfolio.getStockInfo();
+        int sellingAmount = Math.min(requestDto.getAmount(), portfolio.getAmount());
 
-    public boolean makeDecision() {
-        if (holdingAmount <= 0) {
-            return false;
-        }
-        double movement = (((double)stockInfo.getCurrentPrice() / this.buyingPrice) * 100) - 100;
-
-        return movement <= (-1 * this.getStopLossPoint()) || movement >= this.getTakeProfitPoint();
-    }
-
-    public TradingLogDto sellingStocks() {
         TradingLogDto newLogDto = TradingLogDto.builder()
-                .amount(this.holdingAmount)
-                .isBuying(false)
-                .ticker(this.stockInfo.getTicker())
-                .companyName(this.stockInfo.getCompanyName())
-                .buyingPrice(getBuyingPrice())
-                .sellingPrice(this.stockInfo.getCurrentPrice())
+                .amount(sellingAmount)
+                .isBuying(requestDto.isBuying())
+                .ticker(stock.getTicker())
+                .companyName(stock.getCompanyName())
+                .buyingPrice(portfolio.getBuyingPrice())
+                .sellingPrice(stock.getCurrentPrice())
                 .build();
 
-        this.points += (long) holdingAmount * this.stockInfo.getCurrentPrice();
-        this.holdingAmount = 0;
+        Long tradePoints = (long) sellingAmount * stock.getCurrentPrice();
+        this.points += tradePoints;
+
+        portfolio.trade(false, sellingAmount);
 
         return newLogDto;
     }
@@ -82,24 +51,25 @@ public class Account {
         return this.points >= stockInfo.getCurrentPrice();
     }
 
-    public Optional<TradingLogDto> buyingStocks(StockInfo stockInfo) throws Exception {
-        if(!canBuy(stockInfo)){
-            return null;
-        }
-        this.stockInfo = stockInfo;
-        this.buyingPrice = stockInfo.getCurrentPrice();
-        this.holdingAmount = (int)(this.points / this.buyingPrice);
-        this.points -= (long) holdingAmount * this.buyingPrice;
+    public TradingLogDto buyingStocks(TradeRequestDto requestDto) {
+        Portfolio portfolio = requestDto.getPortfolio();
+        StockInfo stockInfo = portfolio.getStockInfo();
+        int buyingAmount = Math.min(requestDto.getAmount(), (int) (this.points / stockInfo.getCurrentPrice()));
 
         TradingLogDto newLogDto = TradingLogDto.builder()
-                .amount(this.holdingAmount)
+                .amount(buyingAmount)
                 .isBuying(true)
                 .ticker(stockInfo.getTicker())
-                .companyName(this.stockInfo.getCompanyName())
-                .buyingPrice(this.buyingPrice)
+                .companyName(stockInfo.getCompanyName())
+                .buyingPrice(stockInfo.getCurrentPrice())
                 .sellingPrice(0)
                 .build();
 
-        return Optional.of(newLogDto);
+        portfolio.setBuyingPrice(stockInfo.getCurrentPrice(), buyingAmount);
+        portfolio.trade(true, buyingAmount);
+        Long tradePoints = (long) buyingAmount * portfolio.getStockInfo().getCurrentPrice();
+        this.points -= tradePoints;
+
+        return newLogDto;
     }
 }

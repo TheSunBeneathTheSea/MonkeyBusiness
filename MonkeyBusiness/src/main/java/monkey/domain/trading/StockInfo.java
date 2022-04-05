@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.Set;
 
 @Getter
 @NoArgsConstructor
@@ -20,8 +20,8 @@ public class StockInfo {
 
     private int currentPrice;
 
-    @OneToMany(mappedBy = "stockInfo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Account> accountList;
+    @OneToMany(mappedBy = "stockInfo", fetch = FetchType.LAZY)
+    private Set<Portfolio> accountList;
 
     @Builder
     public StockInfo(String ticker, String companyName, int currentPrice){
