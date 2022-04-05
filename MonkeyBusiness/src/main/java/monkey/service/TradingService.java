@@ -15,65 +15,67 @@ public class TradingService {
     private final AccountRepository accountRepository;
     private final TradingLogRepository tradingLogRepository;
     private final StockInfoRepository stockInfoRepository;
+    private final PortfolioRepository portfolioRepository;
 
     @Transactional
-    public String setStrategy(AccountSaveRequestDto saveRequestDto) throws Exception {
-        TradingStrategy strategy = TradingStrategy.builder()
-                .takeProfitPoint(saveRequestDto.getTakeProfitPoint())
-                .stopLossPoint(saveRequestDto.getStopLossPoint()).build();
-
-        Account account = accountRepository.getById(saveRequestDto.getUser_id());
-
-        account.updateStrategy(strategy);
-
-        if(ObjectUtils.isEmpty(account.getStockInfo())){
-            buyingStocks(account.getUser_id());
+    public String buyingStocks(TradeRequestVO requestVO) throws Exception {
+        Account account = accountRepository.getById(requestVO.getUserId());
+        if(ObjectUtils.isEmpty(account)){
+            throw new NoSuchElementException("no such data id: " + requestVO.getUserId());
         }
 
-        return "edit profile: " + account.getUser_id();
+        StockInfo stockInfo = stockInfoRepository.getById(requestVO.getTicker());
+        if(ObjectUtils.isEmpty(account)){
+            throw new NoSuchElementException("no such stock ticker: " + requestVO.getTicker());
+        }
+
+        if(!account.canBuy(stockInfo)){
+            throw new Exception("not enough points");
+        }
+
+        if (stockInfo.getCurrentPrice() <= 0) {
+            throw new Exception("invalid stock price");
+        }
+
+        Portfolio portfolio = portfolioRepository.getPortfolioByAccountIdAndTicker(requestVO.getUserId(), requestVO.getTicker())
+                .orElse(Portfolio.builder()
+                    .stockInfo(stockInfo)
+                    .account(account)
+                    .amount(0)
+                    .buyingPrice(0)
+                    .build());
+
+        TradeRequestDto requestDto = new TradeRequestDto(requestVO, portfolio);
+        TradingLogDto newLogDto = account.buyingStocks(requestDto);
+
+        portfolioRepository.save(portfolio);
+        tradingLogRepository.save(new TradingLog(account, newLogDto));
+
+        return "userId:" + requestVO.getUserId() + " buy " + newLogDto.getAmount()
+                + " share of: " + newLogDto.getCompanyName() + " at " + newLogDto.getBuyingPrice();
     }
 
     @Transactional
-    public String buyingStocks(String user_id) throws Exception {
-        Account account = accountRepository.findById(user_id).orElseThrow(() -> new NoSuchElementException("no such data id: " + user_id));
+    public String sellingStocks(TradeRequestVO requestVO) {
+        Account account = accountRepository.findById(requestVO.getUserId()).orElseThrow(() -> new NoSuchElementException("no such account id: " + requestVO.getUserId()));
+        StockInfo stockInfo = stockInfoRepository.findById(requestVO.getTicker()).orElseThrow(() -> new NoSuchElementException("no such stock ticker: " + requestVO.getTicker()));
 
-        List<StockInfo> stockInfoList = stockInfoRepository.findAll();
+        Portfolio portfolio = portfolioRepository.getPortfolioByAccountIdAndTicker(requestVO.getUserId(), requestVO.getTicker())
+                .orElseThrow(() -> new NullPointerException("user: " + requestVO.getUserId() + "does not have ticker: " + requestVO.getTicker()));
 
-        StockInfo randomTarget = stockInfoList.get((int)(Math.random() * stockInfoList.size()));
-
-        TradingLogDto newLogDto = account.buyingStocks(randomTarget).orElseThrow(() -> new NullPointerException("cannot afford points"));
-        TradingLog newLog = new TradingLog(account, newLogDto);
-
-        tradingLogRepository.save(newLog);
-
-        return user_id + ": " + randomTarget.getTicker() + " Buy";
-    }
-
-    @Transactional
-    public String sellingStocks(String user_id) {
-        Account account = accountRepository.findById(user_id).orElseThrow(() -> new NoSuchElementException("no such account id: " + user_id));
-
-        TradingLogDto newLogDto = account.sellingStocks();
+        TradeRequestDto requestDto = new TradeRequestDto(requestVO, portfolio);
+        TradingLogDto newLogDto = account.sellingStocks(requestDto);
 
         tradingLogRepository.save(new TradingLog(account, newLogDto));
 
-        return account.getUser_id() + ": " + newLogDto.getTicker() + " Sell";
-    }
-
-    @Transactional
-    public String checkProfit() throws Exception {
-        List<Account> accountList = accountRepository.findAll();
-
-        for (Account account : accountList) {
-            if (!account.makeDecision()) {
-                continue;
-            }
-
-            sellingStocks(account.getUser_id());
-            buyingStocks(account.getUser_id());
+        if (portfolio.getAmount() == 0) {
+            portfolioRepository.delete(portfolio);
+        } else {
+            portfolioRepository.save(portfolio);
         }
 
-        return "checked";
+        return "userId:" + requestVO.getUserId() + " " + " sell " + newLogDto.getAmount()
+                + " share of: " + newLogDto.getCompanyName() + " at " + newLogDto.getSellingPrice();
     }
 
     @Transactional
@@ -84,6 +86,11 @@ public class TradingService {
     @Transactional
     public Account showTradingDataOfId(String user_id) {
         return accountRepository.getById(user_id);
+    }
+
+    @Transactional
+    public List<Portfolio> showPortfolios(String user_id) {
+        return portfolioRepository.findAllByAccountId(user_id);
     }
 
     @Transactional

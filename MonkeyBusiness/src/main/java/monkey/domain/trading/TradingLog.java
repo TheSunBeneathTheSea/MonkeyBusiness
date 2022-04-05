@@ -15,7 +15,7 @@ public class TradingLog {
     private Long id;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "Account_user_id", columnDefinition = "char(36) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL")
+    @JoinColumn(name = "account_user_id")
     private Account account;
 
     @Column(nullable = false)
