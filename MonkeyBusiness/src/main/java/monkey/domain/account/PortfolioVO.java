@@ -1,6 +1,7 @@
-package monkey.domain.trading;
+package monkey.domain.account;
 
 import lombok.Data;
+import monkey.domain.trading.StockInfoVO;
 
 @Data
 public class PortfolioVO {

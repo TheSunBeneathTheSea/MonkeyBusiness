@@ -1,9 +1,8 @@
 package monkey
 
-import monkey.domain.trading.Account
-import monkey.domain.trading.AccountRepository
-import monkey.domain.trading.Portfolio
-import monkey.domain.trading.PortfolioRepository
+import monkey.domain.account.Account
+import monkey.domain.account.AccountRepository
+import monkey.domain.account.PortfolioRepository
 import monkey.domain.trading.StockInfo
 import monkey.domain.trading.StockInfoRepository
 import monkey.domain.trading.StockUpdateDto

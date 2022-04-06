@@ -1,8 +1,9 @@
-package monkey.domain.trading;
+package monkey.domain.account;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import monkey.domain.trading.StockInfo;
 
 import javax.persistence.*;
 

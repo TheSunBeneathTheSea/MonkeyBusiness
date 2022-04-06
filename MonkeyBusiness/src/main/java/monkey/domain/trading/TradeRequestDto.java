@@ -1,6 +1,7 @@
 package monkey.domain.trading;
 
 import lombok.Data;
+import monkey.domain.account.Portfolio;
 
 @Data
 public class TradeRequestDto {

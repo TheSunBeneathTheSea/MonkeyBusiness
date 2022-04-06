@@ -3,6 +3,7 @@ package monkey.domain.trading;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import monkey.domain.account.Portfolio;
 
 import javax.persistence.*;
 import java.util.Set;

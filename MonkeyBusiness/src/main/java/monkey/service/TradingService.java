@@ -1,6 +1,10 @@
 package monkey.service;
 
 import lombok.RequiredArgsConstructor;
+import monkey.domain.account.Account;
+import monkey.domain.account.AccountRepository;
+import monkey.domain.account.Portfolio;
+import monkey.domain.account.PortfolioRepository;
 import monkey.domain.trading.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +22,7 @@ public class TradingService {
     private final PortfolioRepository portfolioRepository;
 
     @Transactional
-    public String buyingStocks(TradeRequestVO requestVO) throws Exception {
+    public String buyingStocks(TradeRequestVO requestVO) throws NoSuchElementException, IllegalArgumentException {
         Account account = accountRepository.getById(requestVO.getUserId());
         if(ObjectUtils.isEmpty(account)){
             throw new NoSuchElementException("no such data id: " + requestVO.getUserId());
@@ -30,11 +34,11 @@ public class TradingService {
         }
 
         if(!account.canBuy(stockInfo)){
-            throw new Exception("not enough points");
+            throw new IllegalArgumentException("not enough points");
         }
 
         if (stockInfo.getCurrentPrice() <= 0) {
-            throw new Exception("invalid stock price");
+            throw new IllegalArgumentException("invalid stock price");
         }
 
         Portfolio portfolio = portfolioRepository.getPortfolioByAccountIdAndTicker(requestVO.getUserId(), requestVO.getTicker())
@@ -76,21 +80,6 @@ public class TradingService {
 
         return "userId:" + requestVO.getUserId() + " " + " sell " + newLogDto.getAmount()
                 + " share of: " + newLogDto.getCompanyName() + " at " + newLogDto.getSellingPrice();
-    }
-
-    @Transactional
-    public List<Account> showTradingData() {
-        return accountRepository.findAll();
-    }
-
-    @Transactional
-    public Account showTradingDataOfId(String user_id) {
-        return accountRepository.getById(user_id);
-    }
-
-    @Transactional
-    public List<Portfolio> showPortfolios(String user_id) {
-        return portfolioRepository.findAllByAccountId(user_id);
     }
 
     @Transactional

@@ -1,8 +1,11 @@
-package monkey.domain.trading;
+package monkey.domain.account;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import monkey.domain.trading.StockInfo;
+import monkey.domain.trading.TradeRequestDto;
+import monkey.domain.trading.TradingLogDto;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -14,14 +17,17 @@ public class Account {
     @Id
     private String user_id;
 
+    private String nickname;
+
     private Long points;
 
     @OneToMany(mappedBy = "owner")
     private Set<Portfolio> holdingStocks;
 
     @Builder
-    public Account(String user_id) {
+    public Account(String user_id, String nickname) {
         this.user_id = user_id;
+        this.nickname = nickname;
         this.points = 1000000L;
     }
 

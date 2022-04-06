@@ -2,6 +2,7 @@ package monkey.domain.trading;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import monkey.domain.account.Account;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

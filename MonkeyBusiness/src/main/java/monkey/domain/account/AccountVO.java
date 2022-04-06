@@ -1,4 +1,4 @@
-package monkey.domain.trading;
+package monkey.domain.account;
 
 import lombok.Data;
 import java.util.List;
