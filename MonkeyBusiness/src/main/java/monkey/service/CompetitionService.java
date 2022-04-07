@@ -1,11 +1,13 @@
 package monkey.service;
 
 import lombok.RequiredArgsConstructor;
+import monkey.domain.account.AccountId;
 import monkey.domain.competition.*;
 import monkey.domain.account.Account;
 import monkey.domain.account.AccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -57,26 +59,54 @@ public class CompetitionService {
     }
 
     @Transactional
-    public String enrollParticipant(Long competitionId, String accountId) throws IllegalArgumentException {
-        if (participantRepository.existsByAccountIdAndCompetitionId(accountId, competitionId)) {
-            throw new IllegalArgumentException("already exists");
-        }
-        Account account = accountRepository.findById(accountId).orElseThrow(() -> new NoSuchElementException("no such account"));
-        Competition competition = competitionRepository.findById(competitionId).orElseThrow(() -> new NoSuchElementException("no such competition"));
-        Participant participant = Participant.builder()
-                .accountId(accountId)
-                .nickname(account.getNickname())
-                .competition(competition)
-                .build();
+    public List<Long> getCompetitionStartsToday() {
+        return competitionRepository.findCompetitionStartsToday();
+    }
 
-        participantRepository.save(participant);
-
-        return "ID: " + participant.getAccountId() + " nickname: " + participant.getNickname() + " enrolled in competition: " + competition.getName();
+    @Transactional
+    public List<Long> getCompetitionEndsToday() {
+        return competitionRepository.findCompetitionEndsToday();
     }
 
     @Transactional
     public void deleteCompetition(Long competitionId) {
         Competition competition = competitionRepository.findById(competitionId).orElseThrow(() -> new NoSuchElementException("no such competition"));
         competitionRepository.delete(competition);
+    }
+
+    @Transactional
+    public String enrollParticipant(Long competitionId, String userId) throws IllegalArgumentException {
+        Participant participant = participantRepository.findByAccountUserIdAndAccountCompetitionId(userId, competitionId);
+        if (!ObjectUtils.isEmpty(participant)) {
+            throw new IllegalArgumentException("already exists");
+        }
+        Account baseAccount = accountRepository.findBaseAccount(userId);
+        if (ObjectUtils.isEmpty(baseAccount)) {
+            throw new NullPointerException("user: " + userId + "does not exist");
+        }
+        Competition competition = competitionRepository.findById(competitionId).orElseThrow(() -> new NoSuchElementException("no such competition"));
+
+        AccountId accountId = AccountId.builder()
+                .userId(userId)
+                .competitionId(competitionId)
+                .build();
+        Account account = Account.builder()
+                .id(accountId)
+                .nickname(baseAccount.getNickname())
+                .build();
+
+        participant = Participant.builder()
+                .account(account)
+                .build();
+
+        accountRepository.save(account);
+        participantRepository.save(participant);
+
+        return "ID: " + participant.getAccount().getId().getUserId() + " nickname: " + participant.getAccount().getNickname() + " enrolled in competition: " + competition.getName();
+    }
+
+    @Transactional
+    public List<Participant> getParticipantListOfCompetitionOrderByProfitDesc(Long competitionId) {
+        return participantRepository.findAllByCompetitionIdOrderByTotalProfitDesc(competitionId);
     }
 }

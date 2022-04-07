@@ -3,8 +3,10 @@ package monkey.domain.account;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import monkey.domain.competition.Participant;
 import monkey.domain.trading.StockInfo;
 import monkey.domain.trading.TradeRequestDto;
+import monkey.domain.trading.TradingLog;
 import monkey.domain.trading.TradingLogDto;
 
 import javax.persistence.*;
@@ -14,19 +16,26 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 public class Account {
-    @Id
-    private String user_id;
+    @EmbeddedId
+    private AccountId id;
 
     private String nickname;
 
     private Long points;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Portfolio> holdingStocks;
 
+    @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Set<TradingLog> logs;
+
+    @OneToOne(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JoinColumn(name = "participant_id")
+    private Participant participant;
+
     @Builder
-    public Account(String user_id, String nickname) {
-        this.user_id = user_id;
+    public Account(AccountId id, String nickname) {
+        this.id = id;
         this.nickname = nickname;
         this.points = 1000000L;
     }

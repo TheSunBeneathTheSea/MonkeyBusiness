@@ -3,6 +3,7 @@ package monkey.domain.competition;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import monkey.domain.account.Account;
 
 import javax.persistence.*;
 
@@ -14,21 +15,18 @@ public class Participant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String accountId;
-
-    private String nickname;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "competition_id")
-    private Competition competition;
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JoinColumns({
+            @JoinColumn(name = "account_user_id"),
+            @JoinColumn(name = "account_competition_id")
+    })
+    private Account account;
 
     private Long totalProfit;
 
     @Builder
-    public Participant(String accountId, String nickname, Competition competition) {
-        this.accountId = accountId;
-        this.nickname = nickname;
-        this.competition = competition;
+    public Participant(Account account) {
+        this.account = account;
         this.totalProfit = 0L;
     }
 }

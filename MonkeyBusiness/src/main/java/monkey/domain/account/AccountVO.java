@@ -6,12 +6,14 @@ import java.util.stream.Collectors;
 
 @Data
 public class AccountVO {
-    private String user_id;
+    private String userId;
+    private Long competitionId;
     private Long points;
     private Long capital;
 
     public AccountVO(Account account) {
-        this.user_id = account.getUser_id();
+        this.userId = account.getId().getUserId();
+        this.competitionId = account.getId().getCompetitionId();
         this.points = account.getPoints();
         this.capital = account.getHoldingStocks().stream().mapToLong(Portfolio::calculateValue).sum();
     }

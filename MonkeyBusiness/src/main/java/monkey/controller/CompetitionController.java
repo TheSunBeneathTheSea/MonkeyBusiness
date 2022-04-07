@@ -1,12 +1,12 @@
 package monkey.controller;
 
 import lombok.RequiredArgsConstructor;
-import monkey.domain.competition.CompetitionCreateRequestDto;
-import monkey.domain.competition.CompetitionVO;
-import monkey.domain.competition.ParticipantEnrollRequestDto;
+import monkey.domain.competition.*;
 import monkey.service.CompetitionService;
+import monkey.service.RankingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +16,7 @@ import java.util.List;
 @RestController
 public class CompetitionController {
     private final CompetitionService competitionService;
+    private final RankingService rankingService;
 
     @PostMapping("/api/v1/competition")
     public ResponseEntity<String> createCompetition(@RequestBody CompetitionCreateRequestDto requestDto) {
@@ -44,5 +45,19 @@ public class CompetitionController {
     @DeleteMapping("/api/v1/competition/{id}")
     public void deleteCompetition(@PathVariable Long id) {
         competitionService.deleteCompetition(id);
+    }
+
+    @GetMapping("/api/v1/ranking/{competitionId}")
+    public ResponseEntity<List<ParticipantVO>> getParticipants(@PathVariable Long competitionId) {
+        Competition competition = competitionService.getCompetitionById(competitionId);
+
+        if (ObjectUtils.isEmpty(competition)) {
+            throw new NullPointerException("no such competition: " + competitionId);
+        }
+        if(competition.isActive()){
+            return ResponseEntity.status(HttpStatus.OK).body(ParticipantVO.transformList(competitionService.getParticipantListOfCompetitionOrderByProfitDesc(competitionId)));
+        }else{
+            return ResponseEntity.status(HttpStatus.OK).body(ParticipantVO.transformRankDataList(rankingService.getRankingOfCompetition(competitionId)));
+        }
     }
 }

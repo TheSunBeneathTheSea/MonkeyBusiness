@@ -20,8 +20,11 @@ public class Portfolio {
     private StockInfo stockInfo;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_user_id")
-    private Account owner;
+    @JoinColumns({
+        @JoinColumn(name = "account_user_id", referencedColumnName = "userId"),
+        @JoinColumn(name = "account_competition_id", referencedColumnName = "competitionId")
+    })
+    private Account account;
 
     private int amount;
 
@@ -30,7 +33,7 @@ public class Portfolio {
     @Builder
     public Portfolio(StockInfo stockInfo, Account account, int amount, int buyingPrice) {
         this.stockInfo = stockInfo;
-        this.owner = account;
+        this.account = account;
         this.amount = amount;
         this.buyingPrice = buyingPrice;
     }

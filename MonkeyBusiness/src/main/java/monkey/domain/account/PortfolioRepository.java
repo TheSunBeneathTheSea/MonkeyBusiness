@@ -10,6 +10,6 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
     @Query(value = "SELECT * FROM portfolio WHERE account_user_id = ?1 AND stock_info_ticker = ?2", nativeQuery = true)
     Optional<Portfolio> getPortfolioByAccountIdAndTicker(String accountId, String ticker);
 
-    @Query("SELECT p FROM Portfolio p WHERE account_user_id = ?1")
-    List<Portfolio> findAllByAccountId(String accountId);
+    @Query("SELECT p FROM Portfolio p WHERE account_user_id = ?1 AND account_competition_id = ?2")
+    List<Portfolio> findAllByAccountIdAndCompetitionId(String accountId, Long competitionId);
 }

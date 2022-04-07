@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.Set;
 
 @Getter
 @NoArgsConstructor
@@ -26,9 +25,6 @@ public class Competition {
     private LocalDate end;
 
     private boolean active;
-
-    @OneToMany(mappedBy = "competition", fetch = FetchType.LAZY)
-    private Set<Participant> participants;
 
     @Builder
     public Competition(String name, LocalDate start, LocalDate end) {

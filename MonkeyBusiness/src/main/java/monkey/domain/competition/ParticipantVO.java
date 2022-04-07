@@ -2,17 +2,29 @@ package monkey.domain.competition;
 
 import lombok.Data;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Data
 public class ParticipantVO {
-    private String accountId;
     private String nickname;
-    private String competitionName;
     private Long totalProfit;
 
     public ParticipantVO(Participant participant) {
-        this.accountId = participant.getAccountId();
-        this.nickname = participant.getNickname();
-        this.competitionName = participant.getCompetition().getName();
+        this.nickname = participant.getAccount().getNickname();
         this.totalProfit = participant.getTotalProfit();
+    }
+
+    public ParticipantVO(RankingData data) {
+        this.nickname = data.getNickname();
+        this.totalProfit = data.getTotalProfit();
+    }
+
+    public static List<ParticipantVO> transformList(List<Participant> participantList) {
+        return participantList.stream().map(participant -> new ParticipantVO(participant)).collect(Collectors.toList());
+    }
+
+    public static List<ParticipantVO> transformRankDataList(List<RankingData> rankingDataList) {
+        return rankingDataList.stream().map(data -> new ParticipantVO(data)).collect(Collectors.toList());
     }
 }

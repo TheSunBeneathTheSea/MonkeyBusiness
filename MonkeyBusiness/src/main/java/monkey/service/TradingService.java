@@ -1,10 +1,8 @@
 package monkey.service;
 
 import lombok.RequiredArgsConstructor;
-import monkey.domain.account.Account;
-import monkey.domain.account.AccountRepository;
-import monkey.domain.account.Portfolio;
-import monkey.domain.account.PortfolioRepository;
+import monkey.domain.account.*;
+import monkey.domain.competition.CompetitionRepository;
 import monkey.domain.trading.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,20 +18,26 @@ public class TradingService {
     private final TradingLogRepository tradingLogRepository;
     private final StockInfoRepository stockInfoRepository;
     private final PortfolioRepository portfolioRepository;
+    private final CompetitionRepository competitionRepository;
 
     @Transactional
     public String buyingStocks(TradeRequestVO requestVO) throws NoSuchElementException, IllegalArgumentException {
-        Account account = accountRepository.getById(requestVO.getUserId());
-        if(ObjectUtils.isEmpty(account)){
+        if (!checkCompetitionActiveness(requestVO.getCompetitionId())) {
+            return "competition is not active";
+        }
+
+        AccountId id = new AccountId(requestVO.getUserId(), requestVO.getCompetitionId());
+        Account account = accountRepository.getById(id);
+        if (ObjectUtils.isEmpty(account)) {
             throw new NoSuchElementException("no such data id: " + requestVO.getUserId());
         }
 
         StockInfo stockInfo = stockInfoRepository.getById(requestVO.getTicker());
-        if(ObjectUtils.isEmpty(account)){
+        if (ObjectUtils.isEmpty(account)) {
             throw new NoSuchElementException("no such stock ticker: " + requestVO.getTicker());
         }
 
-        if(!account.canBuy(stockInfo)){
+        if (!account.canBuy(stockInfo)) {
             throw new IllegalArgumentException("not enough points");
         }
 
@@ -43,11 +47,11 @@ public class TradingService {
 
         Portfolio portfolio = portfolioRepository.getPortfolioByAccountIdAndTicker(requestVO.getUserId(), requestVO.getTicker())
                 .orElse(Portfolio.builder()
-                    .stockInfo(stockInfo)
-                    .account(account)
-                    .amount(0)
-                    .buyingPrice(0)
-                    .build());
+                        .stockInfo(stockInfo)
+                        .account(account)
+                        .amount(0)
+                        .buyingPrice(0)
+                        .build());
 
         TradeRequestDto requestDto = new TradeRequestDto(requestVO, portfolio);
         TradingLogDto newLogDto = account.buyingStocks(requestDto);
@@ -61,7 +65,12 @@ public class TradingService {
 
     @Transactional
     public String sellingStocks(TradeRequestVO requestVO) {
-        Account account = accountRepository.findById(requestVO.getUserId()).orElseThrow(() -> new NoSuchElementException("no such account id: " + requestVO.getUserId()));
+        if (!checkCompetitionActiveness(requestVO.getCompetitionId())) {
+            return "competition is not active";
+        }
+
+        AccountId id = new AccountId(requestVO.getUserId(), requestVO.getCompetitionId());
+        Account account = accountRepository.findById(id).orElseThrow(() -> new NoSuchElementException("no such account id: " + requestVO.getUserId()));
         StockInfo stockInfo = stockInfoRepository.findById(requestVO.getTicker()).orElseThrow(() -> new NoSuchElementException("no such stock ticker: " + requestVO.getTicker()));
 
         Portfolio portfolio = portfolioRepository.getPortfolioByAccountIdAndTicker(requestVO.getUserId(), requestVO.getTicker())
@@ -83,12 +92,15 @@ public class TradingService {
     }
 
     @Transactional
-    public List<TradingLog> showLogs() {
-        return tradingLogRepository.findAllDesc();
+    public List<TradingLog> showLogsOfUserByUserId(AccountId id) {
+        return tradingLogRepository.findAllByUserIdAndCompetitionIdDesc(id.getUserId(), id.getCompetitionId());
     }
 
-    @Transactional
-    public List<TradingLog> showLogsOfUserByUserId(String user_id) {
-        return tradingLogRepository.findAllByUserIdDesc(user_id);
+    public boolean checkCompetitionActiveness(Long competitionId) {
+        // base account
+        if (competitionId == 0L) {
+            return true;
+        }
+        return competitionRepository.isActive(competitionId);
     }
 }

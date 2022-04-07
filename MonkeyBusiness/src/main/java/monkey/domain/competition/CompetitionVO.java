@@ -13,7 +13,6 @@ public class CompetitionVO {
     private LocalDate start;
     private LocalDate end;
     private boolean active;
-    private List<ParticipantVO> participants;
 
     public CompetitionVO(Competition competition) {
         this.id = competition.getId();
@@ -21,7 +20,6 @@ public class CompetitionVO {
         this.start = competition.getStart();
         this.end = competition.getEnd();
         this.active = competition.isActive();
-        this.participants = competition.getParticipants().stream().map(participant -> new ParticipantVO(participant)).collect(Collectors.toList());
     }
 
     public static List<CompetitionVO> transformList(List<Competition> competitions) {

@@ -1,14 +1,13 @@
 package monkey.controller;
 
 import lombok.RequiredArgsConstructor;
-import monkey.domain.account.AccountSaveRequestDto;
-import monkey.domain.account.AccountVO;
-import monkey.domain.account.PortfolioVO;
+import monkey.domain.account.*;
 import monkey.service.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,23 +23,36 @@ public class AccountController {
     }
 
     @GetMapping("/api/v1/account")
-    public ResponseEntity<List<AccountVO>> showAccounts() {
-        return ResponseEntity.status(HttpStatus.OK).body(AccountVO.transformList(accountService.showTradingData()));
+    public ResponseEntity<List<AccountVO>> showAccounts(@RequestBody HashMap<String, String> map) {
+        if(!map.containsKey("userId")){
+            throw new IllegalArgumentException("need userId");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(AccountVO.transformList(accountService.showAccounts(map.get("userId"))));
     }
 
     @DeleteMapping("/api/v1/account")
-    public void deleteAccount(@RequestBody String accountId) {
-        accountService.deleteAccount(accountId);
+    public void deleteAccount(@RequestBody HashMap<String, String> map) {
+        if(!map.containsKey("userId")){
+            throw new IllegalArgumentException("need userId");
+        }
+        accountService.deleteAccount(map.get("userId"));
     }
 
-    @GetMapping("/api/v1/account/{user_id}")
-    public ResponseEntity<AccountVO> showAccountById(@PathVariable String user_id) {
-        return ResponseEntity.status(HttpStatus.OK).body(new AccountVO(accountService.showTradingDataOfId(user_id)));
+    @GetMapping("/api/v1/account/{competitionId}")
+    public ResponseEntity<AccountVO> showAccountById(@RequestBody HashMap<String, String> map, @PathVariable Long competitionId) {
+        if(!map.containsKey("userId")){
+            throw new IllegalArgumentException("need userId");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new AccountVO(accountService.showAccountById(
+                        new AccountId(map.get("userId"), competitionId)
+                ))
+        );
     }
 
-    @GetMapping("/api/v1/portfolio/{user_id}")
-    public ResponseEntity<List<PortfolioVO>> showPortfolios(@PathVariable String user_id) {
-        List<PortfolioVO> portfolioVOList = accountService.showPortfolios(user_id).stream().map(portfolio -> new PortfolioVO(portfolio)).collect(Collectors.toList());
+    @GetMapping("/api/v1/portfolio")
+    public ResponseEntity<List<PortfolioVO>> showPortfolios(@RequestBody AccountId id) {
+        List<PortfolioVO> portfolioVOList = PortfolioVO.transformList(accountService.showPortfolios(id.getUserId(), id.getCompetitionId()));
         return ResponseEntity.status(HttpStatus.OK).body(portfolioVOList);
     }
 }

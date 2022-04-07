@@ -15,8 +15,11 @@ public class TradingLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "account_user_id", referencedColumnName = "userId"),
+            @JoinColumn(name = "account_competition_id", referencedColumnName = "competitionId")
+    })
     private Account account;
 
     @Column(nullable = false)

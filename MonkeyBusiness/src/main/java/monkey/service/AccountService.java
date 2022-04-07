@@ -15,8 +15,12 @@ public class AccountService {
 
     @Transactional
     public String createAccount(AccountSaveRequestDto requestDto) {
+        AccountId id = new AccountId(requestDto.getUserId(), 0L);
+        if(accountRepository.existsById(id)){
+            throw new IllegalArgumentException("user: " + requestDto.getUserId() + " already have base account");
+        }
         Account account = Account.builder()
-                .user_id(requestDto.getUserId())
+                .id(id)
                 .nickname(requestDto.getNickname())
                 .build();
 
@@ -26,23 +30,28 @@ public class AccountService {
     }
 
     @Transactional
-    public void deleteAccount(String accountId) {
-        Account account = accountRepository.findById(accountId).orElseThrow(() -> new NullPointerException("no such account"));
-        accountRepository.delete(account);
+    public void deleteAccount(String userId) {
+        List<Account> account = accountRepository.findAllByUserId(userId);
+        accountRepository.deleteAll(account);
     }
 
     @Transactional
-    public List<Account> showTradingData() {
-        return accountRepository.findAll();
+    public void deleteAccountInCompetition(Long competitionId) {
+        accountRepository.deleteAllAccountInCompetition(competitionId);
     }
 
     @Transactional
-    public Account showTradingDataOfId(String user_id) {
-        return accountRepository.getById(user_id);
+    public List<Account> showAccounts(String userId) {
+        return accountRepository.findAllByUserId(userId);
     }
 
     @Transactional
-    public List<Portfolio> showPortfolios(String user_id) {
-        return portfolioRepository.findAllByAccountId(user_id);
+    public Account showAccountById(AccountId id) {
+        return accountRepository.findAccountById(id.getUserId(), id.getCompetitionId());
+    }
+
+    @Transactional
+    public List<Portfolio> showPortfolios(String userId, Long competitionId) {
+        return portfolioRepository.findAllByAccountIdAndCompetitionId(userId, competitionId);
     }
 }

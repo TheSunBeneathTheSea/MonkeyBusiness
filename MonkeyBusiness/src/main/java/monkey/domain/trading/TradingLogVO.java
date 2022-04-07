@@ -10,7 +10,9 @@ import java.util.stream.Collectors;
 public class TradingLogVO {
     private Long id;
 
-    private String user_id;
+    private String userId;
+
+    private Long competitionId;
 
     private boolean isBuying;
 
@@ -30,7 +32,8 @@ public class TradingLogVO {
 
     public TradingLogVO (TradingLog tradingLog) {
         this.id = tradingLog.getId();
-        this.user_id = tradingLog.getAccount().getUser_id();
+        this.userId = tradingLog.getAccount().getId().getUserId();
+        this.competitionId = tradingLog.getAccount().getId().getCompetitionId();
         this.isBuying = tradingLog.isBuying();
         this.ticker = tradingLog.getTicker();
         this.companyName = tradingLog.getCompanyName();

@@ -1,6 +1,7 @@
 package monkey.controller;
 
 import lombok.RequiredArgsConstructor;
+import monkey.domain.account.AccountId;
 import monkey.domain.trading.*;
 import monkey.service.TradingService;
 import org.springframework.http.HttpStatus;
@@ -26,12 +27,7 @@ public class TradingController {
     }
 
     @GetMapping("/api/v1/logs")
-    public ResponseEntity<List<TradingLogVO>> showLogs() {
-        return ResponseEntity.status(HttpStatus.OK).body(TradingLogVO.transformList(tradingService.showLogs()));
-    }
-
-    @GetMapping("/api/v1/logs/{user_id}")
-    public ResponseEntity<List<TradingLogVO>> showAccountLogs(@PathVariable String user_id) {
-        return ResponseEntity.status(HttpStatus.OK).body(TradingLogVO.transformList(tradingService.showLogsOfUserByUserId(user_id)));
+    public ResponseEntity<List<TradingLogVO>> showAccountLogs(@RequestBody AccountId id) {
+        return ResponseEntity.status(HttpStatus.OK).body(TradingLogVO.transformList(tradingService.showLogsOfUserByUserId(id)));
     }
 }
