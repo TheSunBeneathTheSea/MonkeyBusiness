@@ -23,19 +23,25 @@ public class TradingService {
     @Transactional
     public String buyingStocks(TradeRequestVO requestVO) throws NoSuchElementException, IllegalArgumentException {
         if (!checkCompetitionActiveness(requestVO.getCompetitionId())) {
-            return "competition is not active";
+            throw new IllegalArgumentException("competition: " + requestVO.getCompetitionId() + " is not active");
+        }
+
+        if (requestVO.getAmount() <= 0) {
+            throw new IllegalArgumentException("you cannot buy " + requestVO.getAmount() + " amount");
         }
 
         AccountId id = new AccountId(requestVO.getUserId(), requestVO.getCompetitionId());
-        Account account = accountRepository.getById(id);
-        if (ObjectUtils.isEmpty(account)) {
-            throw new NoSuchElementException("no such data id: " + requestVO.getUserId());
-        }
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "no such account for user id: "
+                                + requestVO.getUserId() + ", competition id: "
+                                + requestVO.getCompetitionId()
+                ));
 
-        StockInfo stockInfo = stockInfoRepository.getById(requestVO.getTicker());
-        if (ObjectUtils.isEmpty(account)) {
-            throw new NoSuchElementException("no such stock ticker: " + requestVO.getTicker());
-        }
+        StockInfo stockInfo = stockInfoRepository.findById(requestVO.getTicker())
+                .orElseThrow(() -> new NoSuchElementException(
+                        "no such stock ticker: " + requestVO.getTicker()
+                ));
 
         if (!account.canBuy(stockInfo)) {
             throw new IllegalArgumentException("not enough points");
@@ -66,7 +72,11 @@ public class TradingService {
     @Transactional
     public String sellingStocks(TradeRequestVO requestVO) {
         if (!checkCompetitionActiveness(requestVO.getCompetitionId())) {
-            return "competition is not active";
+            throw new IllegalArgumentException("competition: " + requestVO.getCompetitionId() + " is not active");
+        }
+
+        if (requestVO.getAmount() <= 0) {
+            throw new IllegalArgumentException("you cannot sell " + requestVO.getAmount() + " amount");
         }
 
         AccountId id = new AccountId(requestVO.getUserId(), requestVO.getCompetitionId());
@@ -78,8 +88,9 @@ public class TradingService {
 
         TradeRequestDto requestDto = new TradeRequestDto(requestVO, portfolio);
         TradingLogDto newLogDto = account.sellingStocks(requestDto);
+        TradingLog newLog = new TradingLog(account, newLogDto);
 
-        tradingLogRepository.save(new TradingLog(account, newLogDto));
+        tradingLogRepository.save(newLog);
 
         if (portfolio.getAmount() == 0) {
             portfolioRepository.delete(portfolio);

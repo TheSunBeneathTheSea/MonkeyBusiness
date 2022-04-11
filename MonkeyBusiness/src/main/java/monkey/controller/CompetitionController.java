@@ -1,6 +1,7 @@
 package monkey.controller;
 
 import lombok.RequiredArgsConstructor;
+import monkey.domain.account.AccountId;
 import monkey.domain.competition.*;
 import monkey.service.CompetitionService;
 import monkey.service.RankingService;
@@ -26,8 +27,8 @@ public class CompetitionController {
     }
 
     @PostMapping("/api/v1/participant")
-    public ResponseEntity<String> enrollParticipant(@RequestBody ParticipantEnrollRequestDto requestDto) {
-        String msg = competitionService.enrollParticipant(requestDto.getCompetitionId(), requestDto.getAccountId());
+    public ResponseEntity<String> enrollParticipant(@RequestBody AccountId requestDto) {
+        String msg = competitionService.enrollParticipant(requestDto.getCompetitionId(), requestDto.getUserId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(msg);
     }
@@ -48,16 +49,13 @@ public class CompetitionController {
     }
 
     @GetMapping("/api/v1/ranking/{competitionId}")
-    public ResponseEntity<List<ParticipantVO>> getParticipants(@PathVariable Long competitionId) {
+    public ResponseEntity<List<RankingData>> getParticipants(@PathVariable Long competitionId) {
         Competition competition = competitionService.getCompetitionById(competitionId);
 
         if (ObjectUtils.isEmpty(competition)) {
             throw new NullPointerException("no such competition: " + competitionId);
         }
-        if(competition.isActive()){
-            return ResponseEntity.status(HttpStatus.OK).body(ParticipantVO.transformList(competitionService.getParticipantListOfCompetitionOrderByProfitDesc(competitionId)));
-        }else{
-            return ResponseEntity.status(HttpStatus.OK).body(ParticipantVO.transformRankDataList(rankingService.getRankingOfCompetition(competitionId)));
-        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(rankingService.getRankingOfCompetition(competitionId));
     }
 }

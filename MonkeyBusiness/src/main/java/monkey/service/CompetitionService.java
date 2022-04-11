@@ -16,7 +16,6 @@ import java.util.NoSuchElementException;
 @Service
 public class CompetitionService {
     private final CompetitionRepository competitionRepository;
-    private final ParticipantRepository participantRepository;
     private final AccountRepository accountRepository;
 
     @Transactional
@@ -76,8 +75,8 @@ public class CompetitionService {
 
     @Transactional
     public String enrollParticipant(Long competitionId, String userId) throws IllegalArgumentException {
-        Participant participant = participantRepository.findByAccountUserIdAndAccountCompetitionId(userId, competitionId);
-        if (!ObjectUtils.isEmpty(participant)) {
+        Account check = accountRepository.findAccountById(userId, competitionId);
+        if (!ObjectUtils.isEmpty(check)) {
             throw new IllegalArgumentException("already exists");
         }
         Account baseAccount = accountRepository.findBaseAccount(userId);
@@ -95,18 +94,13 @@ public class CompetitionService {
                 .nickname(baseAccount.getNickname())
                 .build();
 
-        participant = Participant.builder()
-                .account(account)
-                .build();
-
         accountRepository.save(account);
-        participantRepository.save(participant);
 
-        return "ID: " + participant.getAccount().getId().getUserId() + " nickname: " + participant.getAccount().getNickname() + " enrolled in competition: " + competition.getName();
+        return "ID: " + account.getId().getUserId() + " nickname: " + account.getNickname() + " enrolled in competition: " + competition.getName();
     }
 
     @Transactional
-    public List<Participant> getParticipantListOfCompetitionOrderByProfitDesc(Long competitionId) {
-        return participantRepository.findAllByCompetitionIdOrderByTotalProfitDesc(competitionId);
+    public List<Account> getParticipantsByCompetitionId(Long competitionId) {
+        return accountRepository.findAllByCompetitionId(competitionId);
     }
 }

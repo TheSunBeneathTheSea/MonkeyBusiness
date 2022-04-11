@@ -1,11 +1,14 @@
 package monkey.service;
 
 import lombok.RequiredArgsConstructor;
+import monkey.domain.account.Account;
+import monkey.domain.account.AccountRepository;
 import monkey.domain.competition.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -13,24 +16,13 @@ import java.util.NoSuchElementException;
 @Service
 public class RankingService {
     private final RankingRepository rankingRepository;
-    private final ParticipantRepository participantRepository;
+    private final AccountRepository accountRepository;
     private final CompetitionRepository competitionRepository;
 
     @Transactional
     public String storeRankData(Long competitionId) {
-        List<Participant> participantList = participantRepository.findAllByCompetitionIdOrderByTotalProfitDesc(competitionId);
+        List<RankingData> rankingDataList = getRankingData(competitionId);
 
-        List<RankingData> rankingDataList = new ArrayList<>();
-        for (int i = 0; i < participantList.size(); i++) {
-            Participant p = participantList.get(i);
-            RankingData r = RankingData.builder()
-                    .nickname(p.getAccount().getNickname())
-                    .rank(i + 1)
-                    .totalProfit(p.getTotalProfit())
-                    .build();
-
-            rankingDataList.add(r);
-        }
         Ranking ranking = Ranking.builder()
                 .competitionId(competitionId)
                 .data(rankingDataList)
@@ -49,18 +41,34 @@ public class RankingService {
             return rankingRepository.findByCompetitionId(competitionId).getData();
         }
 
-        List<Participant> participantList = participantRepository.findAllByCompetitionIdOrderByTotalProfitDesc(competitionId);
 
+        return getRankingData(competitionId);
+    }
+
+    public List<RankingData> getRankingData(Long competitionId) {
+        List<Account> accountList = accountRepository.findAllByCompetitionId(competitionId);
         List<RankingData> rankingDataList = new ArrayList<>();
-        for (int i = 0; i < participantList.size(); i++) {
-            Participant p = participantList.get(i);
-            RankingData r = RankingData.builder()
-                    .nickname(p.getAccount().getNickname())
-                    .rank(i + 1)
-                    .totalProfit(p.getTotalProfit())
+
+        accountList.sort(new Comparator<Account>() {
+            @Override
+            public int compare(Account o1, Account o2) {
+                return (int)(o1.getTotalCapital() - o2.getTotalCapital());
+            }
+        });
+
+        Long formerTotalProfit = -1L;
+        int formerRank = 0;
+        for (int i = 0; i < accountList.size(); i++) {
+            Account a = accountList.get(i);
+            RankingData rank = RankingData.builder()
+                    .nickname(a.getNickname())
+                    .rank(formerTotalProfit == a.getTotalCapital() ? formerRank : i + 1)
+                    .totalProfit(a.getTotalCapital())
                     .build();
 
-            rankingDataList.add(r);
+            rankingDataList.add(rank);
+            formerTotalProfit = rank.getTotalProfit();
+            formerRank = rank.getRank();
         }
 
         return rankingDataList;

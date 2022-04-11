@@ -3,7 +3,6 @@ package monkey.domain.account;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import monkey.domain.competition.Participant;
 import monkey.domain.trading.StockInfo;
 import monkey.domain.trading.TradeRequestDto;
 import monkey.domain.trading.TradingLog;
@@ -23,15 +22,11 @@ public class Account {
 
     private Long points;
 
-    @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE)
     private Set<Portfolio> holdingStocks;
 
-    @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE)
     private Set<TradingLog> logs;
-
-    @OneToOne(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JoinColumn(name = "participant_id")
-    private Participant participant;
 
     @Builder
     public Account(AccountId id, String nickname) {
@@ -86,5 +81,9 @@ public class Account {
         this.points -= tradePoints;
 
         return newLogDto;
+    }
+
+    public Long getTotalCapital() {
+        return this.getHoldingStocks().stream().mapToLong(Portfolio::calculateValue).sum();
     }
 }

@@ -15,7 +15,7 @@ public class AccountVO {
         this.userId = account.getId().getUserId();
         this.competitionId = account.getId().getCompetitionId();
         this.points = account.getPoints();
-        this.capital = account.getHoldingStocks().stream().mapToLong(Portfolio::calculateValue).sum();
+        this.capital = account.getTotalCapital();
     }
 
     public static List<AccountVO> transformList(List<Account> accountList) {
