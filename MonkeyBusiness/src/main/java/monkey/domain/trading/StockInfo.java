@@ -37,12 +37,11 @@ public class StockInfo {
         this.currentPrice = updateDto.getCurrentPrice();
     }
 
-    public void updateOpenPrice(int price) {
-        this.openPrice = price;
-        this.currentPrice = price;
+    public void updateOpenPrice() {
+        this.openPrice = this.currentPrice;
     }
 
-    public void updateCurrentPrice(StockUpdateDto updateDto) {
-        this.currentPrice = updateDto.getCurrentPrice();
+    public void updateCurrentPrice(int price) {
+        this.currentPrice = price;
     }
 }

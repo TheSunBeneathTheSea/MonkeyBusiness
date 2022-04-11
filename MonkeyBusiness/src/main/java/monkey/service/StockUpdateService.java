@@ -56,24 +56,31 @@ public class StockUpdateService {
                             .ticker(ticker)
                             .companyName(companyName)
                             .currentPrice(currentPrice).build();
-                    newStock.updateOpenPrice(currentPrice);
+                    newStock.updateOpenPrice();
 
                     stockInfoRepository.save(newStock);
                 }
             }else{
                throw new IOException("stockinfo size: " + infoList.size() + " != updateDto size: " + updateDtoMap.size() + "does not match");
             }
+        }else{
+            List<StockInfo> stockInfoList = stockInfoRepository.findAll();
+            Set<String> keyset = updateDtoMap.keySet();
+            for (StockInfo s : stockInfoList) {
+                int currentPrice = (int) updateDtoMap.get(s.getTicker())[1];
+
+                s.updateCurrentPrice(currentPrice);
+            }
         }
         if(isOpening){
-            return "stock update complete";
+            for (int i = 0; i < infoList.size(); i++) {
+                StockInfo info = infoList.get(i);
+
+                info.updateOpenPrice();
+            }
+            return "market opening complete";
         }
 
-        for (int i = 0; i < infoList.size(); i++) {
-            StockInfo info = infoList.get(i);
-
-            info.updateOpenPrice((int)updateDtoMap.get(info.getTicker())[1]);
-        }
-
-        return "market opening complete";
+        return "stock update complete";
     }
 }
