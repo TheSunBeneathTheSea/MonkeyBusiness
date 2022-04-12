@@ -32,6 +32,7 @@ public class CompetitionScheduler {
         for (Long id : today) {
             competitionService.endCompetition(id);
             rankingService.storeRankData(id);
+            accountService.prepareDelete(id);
             accountService.deleteAccountInCompetition(id);
         }
     }

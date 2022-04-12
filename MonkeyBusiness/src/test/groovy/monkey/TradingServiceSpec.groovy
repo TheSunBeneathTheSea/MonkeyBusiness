@@ -7,6 +7,7 @@ import monkey.domain.account.PortfolioRepository
 import monkey.domain.trading.StockInfo
 import monkey.domain.trading.StockInfoRepository
 import monkey.domain.trading.TradeRequestVO
+import monkey.domain.trading.TradingLogRepository
 import monkey.service.TradingService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -22,6 +23,8 @@ class TradingServiceSpec extends Specification {
     StockInfoRepository stockInfoRepository
     @Autowired
     PortfolioRepository portfolioRepository
+    @Autowired
+    TradingLogRepository tradingLogRepository
 
     @Autowired
     TradingService tradingService
@@ -147,6 +150,8 @@ class TradingServiceSpec extends Specification {
         then:
         accountRepository.findAccountById("aaa", 0L).getPoints() == points
         portfolioRepository.getPortfolioByAccountIdAndTicker("aaa","001").get().getAmount() == remain
+        tradingLogRepository.findAllByUserIdAndCompetitionIdDesc("aaa", 0L).get(1).getAmount() == buy
+        tradingLogRepository.findAllByUserIdAndCompetitionIdDesc("aaa", 0L).get(0).getAmount() == sell
 
         where:
         buy     | sell      || points       | remain

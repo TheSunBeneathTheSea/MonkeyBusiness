@@ -22,10 +22,10 @@ public class Account {
 
     private Long points;
 
-    @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Portfolio> holdingStocks;
 
-    @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TradingLog> logs;
 
     @Builder
@@ -84,6 +84,11 @@ public class Account {
     }
 
     public Long getTotalCapital() {
-        return this.getHoldingStocks().stream().mapToLong(Portfolio::calculateValue).sum();
+        return this.getHoldingStocks().stream().mapToLong(Portfolio::calculateValue).sum() + this.points;
+    }
+
+    public void prepareDelete() {
+        this.holdingStocks.clear();
+        this.logs.clear();
     }
 }

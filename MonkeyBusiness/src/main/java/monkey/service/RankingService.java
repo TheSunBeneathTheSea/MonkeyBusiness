@@ -52,7 +52,7 @@ public class RankingService {
         accountList.sort(new Comparator<Account>() {
             @Override
             public int compare(Account o1, Account o2) {
-                return (int)(o1.getTotalCapital() - o2.getTotalCapital());
+                return (int)(o2.getTotalCapital() - o1.getTotalCapital());
             }
         });
 
@@ -62,12 +62,12 @@ public class RankingService {
             Account a = accountList.get(i);
             RankingData rank = RankingData.builder()
                     .nickname(a.getNickname())
-                    .rank(formerTotalProfit == a.getTotalCapital() ? formerRank : i + 1)
-                    .totalProfit(a.getTotalCapital())
+                    .rank(formerTotalProfit.equals(a.getTotalCapital()) ? formerRank : i + 1)
+                    .totalCapital(a.getTotalCapital())
                     .build();
 
             rankingDataList.add(rank);
-            formerTotalProfit = rank.getTotalProfit();
+            formerTotalProfit = rank.getTotalCapital();
             formerRank = rank.getRank();
         }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.AttributeConverter;
+import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
@@ -26,7 +27,7 @@ public class RankDataConverter implements AttributeConverter<List<RankingData>, 
     public List<RankingData> convertToEntityAttribute(String dbData) {
         List<RankingData> deserialized = null;
         try {
-            deserialized = objectMapper.readValue(dbData, List.class);
+            deserialized = Arrays.asList(objectMapper.readValue(dbData, RankingData[].class));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

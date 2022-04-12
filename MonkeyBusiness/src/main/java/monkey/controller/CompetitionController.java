@@ -49,7 +49,7 @@ public class CompetitionController {
     }
 
     @GetMapping("/api/v1/ranking/{competitionId}")
-    public ResponseEntity<List<RankingData>> getParticipants(@PathVariable Long competitionId) {
+    public ResponseEntity<List<RankingData>> getRankingData(@PathVariable Long competitionId) {
         Competition competition = competitionService.getCompetitionById(competitionId);
 
         if (ObjectUtils.isEmpty(competition)) {
