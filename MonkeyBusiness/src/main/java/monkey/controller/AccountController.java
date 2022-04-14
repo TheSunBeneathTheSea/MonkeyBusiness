@@ -23,11 +23,8 @@ public class AccountController {
     }
 
     @GetMapping("/api/v1/account")
-    public ResponseEntity<List<AccountVO>> showAccounts(@RequestBody HashMap<String, String> map) {
-        if(!map.containsKey("userId")){
-            throw new IllegalArgumentException("need userId");
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(AccountVO.transformList(accountService.showAccounts(map.get("userId"))));
+    public ResponseEntity<List<AccountVO>> showAccounts(@RequestParam String userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(AccountVO.transformList(accountService.showAccounts(userId)));
     }
 
     @DeleteMapping("/api/v1/account")
@@ -40,19 +37,17 @@ public class AccountController {
     }
 
     @GetMapping("/api/v1/account/{competitionId}")
-    public ResponseEntity<AccountVO> showAccountById(@RequestBody HashMap<String, String> map, @PathVariable Long competitionId) {
-        if(!map.containsKey("userId")){
-            throw new IllegalArgumentException("need userId");
-        }
+    public ResponseEntity<AccountVO> showAccountById(@RequestParam String userId, @PathVariable Long competitionId) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 new AccountVO(accountService.showAccountById(
-                        new AccountId(map.get("userId"), competitionId)
+                        new AccountId(userId, competitionId)
                 ))
         );
     }
 
     @GetMapping("/api/v1/portfolio")
-    public ResponseEntity<List<PortfolioVO>> showPortfolios(@RequestBody AccountId id) {
+    public ResponseEntity<List<PortfolioVO>> showPortfolios(@RequestParam String userId, @RequestParam Long competitionId) {
+        AccountId id = new AccountId(userId, competitionId);
         List<PortfolioVO> portfolioVOList = PortfolioVO.transformList(accountService.showPortfolios(id.getUserId(), id.getCompetitionId()));
         return ResponseEntity.status(HttpStatus.OK).body(portfolioVOList);
     }

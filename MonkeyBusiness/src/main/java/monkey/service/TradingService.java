@@ -106,6 +106,11 @@ public class TradingService {
         return tradingLogRepository.findAllByUserIdAndCompetitionIdDesc(id.getUserId(), id.getCompetitionId());
     }
 
+    @Transactional
+    public List<StockInfo> showStockInfo() {
+        return stockInfoRepository.findAll();
+    }
+
     public boolean checkCompetitionActiveness(Long competitionId) {
         // base account
         if (competitionId == 0L) {
