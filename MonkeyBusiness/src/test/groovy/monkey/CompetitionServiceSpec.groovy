@@ -10,7 +10,7 @@ import monkey.domain.competition.CompetitionRepository
 import monkey.domain.competition.RankingRepository
 import monkey.domain.trading.StockInfo
 import monkey.domain.trading.StockInfoRepository
-import monkey.domain.trading.TradeRequestVO
+import monkey.domain.trading.TradeOrderRequestDto
 import monkey.domain.trading.TradingLogRepository
 import monkey.service.AccountService
 import monkey.service.CompetitionService
@@ -101,8 +101,8 @@ class CompetitionServiceSpec extends Specification{
     @Transactional
     def "대회 개최"() {
         given:
-        CompetitionCreateRequestDto requestDto = new CompetitionCreateRequestDto("testComp", LocalDate.of(2022, 4, 12), LocalDate.of(2022, 4, 12))
-        CompetitionCreateRequestDto requestDto2 = new CompetitionCreateRequestDto("willBeDeleted", LocalDate.of(2022, 4, 12), LocalDate.of(2022, 4, 12))
+        CompetitionCreateRequestDto requestDto = new CompetitionCreateRequestDto("testComp", LocalDate.now(), LocalDate.now())
+        CompetitionCreateRequestDto requestDto2 = new CompetitionCreateRequestDto("willBeDeleted", LocalDate.now(), LocalDate.now())
 
         when:
         ResponseEntity<String> response = competitionController.createCompetition(requestDto)
@@ -178,7 +178,7 @@ class CompetitionServiceSpec extends Specification{
         Long compId = competitionRepository.findCompetitionStartsToday().get(0)
         //competition progress
         //everyone buy same stock on same price
-        TradeRequestVO tradeRequestVO = new TradeRequestVO()
+        TradeOrderRequestDto tradeRequestVO = new TradeOrderRequestDto()
         tradeRequestVO.setUserId("aaa")
         tradeRequestVO.setCompetitionId(compId)
         tradeRequestVO.setAmount(10)

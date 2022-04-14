@@ -36,6 +36,15 @@ public class AccountService {
     }
 
     @Transactional
+    public void prepareDelete(String userId) {
+        List<Account> accountList = accountRepository.findAllByUserId(userId);
+        for (Account a : accountList) {
+            a.prepareDelete();
+        }
+        accountRepository.saveAll(accountList);
+    }
+
+    @Transactional
     public void prepareDelete(Long competitionId) {
         List<Account> accountList = accountRepository.findAllByCompetitionId(competitionId);
         for (Account a : accountList) {

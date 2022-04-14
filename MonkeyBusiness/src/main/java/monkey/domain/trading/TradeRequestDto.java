@@ -15,7 +15,7 @@ public class TradeRequestDto {
 
     private int amount;
 
-    public TradeRequestDto(TradeRequestVO vo, Portfolio portfolio) {
+    public TradeRequestDto(TradeOrderRequestDto vo, Portfolio portfolio) {
         this.userId = vo.getUserId();
         this.competitionId = vo.getCompetitionId();
         this.buying = vo.isBuying();

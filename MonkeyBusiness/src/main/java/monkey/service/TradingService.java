@@ -6,7 +6,6 @@ import monkey.domain.competition.CompetitionRepository;
 import monkey.domain.trading.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -21,7 +20,7 @@ public class TradingService {
     private final CompetitionRepository competitionRepository;
 
     @Transactional
-    public String buyingStocks(TradeRequestVO requestVO) throws NoSuchElementException, IllegalArgumentException {
+    public String buyingStocks(TradeOrderRequestDto requestVO) throws NoSuchElementException, IllegalArgumentException {
         if (!checkCompetitionActiveness(requestVO.getCompetitionId())) {
             throw new IllegalArgumentException("competition: " + requestVO.getCompetitionId() + " is not active");
         }
@@ -70,7 +69,7 @@ public class TradingService {
     }
 
     @Transactional
-    public String sellingStocks(TradeRequestVO requestVO) {
+    public String sellingStocks(TradeOrderRequestDto requestVO) {
         if (!checkCompetitionActiveness(requestVO.getCompetitionId())) {
             throw new IllegalArgumentException("competition: " + requestVO.getCompetitionId() + " is not active");
         }

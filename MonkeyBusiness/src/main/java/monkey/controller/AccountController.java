@@ -35,6 +35,7 @@ public class AccountController {
         if(!map.containsKey("userId")){
             throw new IllegalArgumentException("need userId");
         }
+        accountService.prepareDelete(map.get("userId"));
         accountService.deleteAccount(map.get("userId"));
     }
 

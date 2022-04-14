@@ -3,7 +3,7 @@ package monkey.domain.trading;
 import lombok.Data;
 
 @Data
-public class TradeRequestVO {
+public class TradeOrderRequestDto {
     private String userId;
 
     private Long competitionId;

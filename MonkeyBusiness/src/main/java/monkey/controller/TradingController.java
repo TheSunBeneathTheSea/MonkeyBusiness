@@ -18,11 +18,11 @@ public class TradingController {
     private final TradingService tradingService;
 
     @PostMapping("/api/v1/trade")
-    public ResponseEntity<String> placeOrder(@RequestBody TradeRequestVO tradeRequestVO) throws NoSuchElementException, IllegalArgumentException {
-        if (tradeRequestVO.isBuying()) {
-            return ResponseEntity.status(HttpStatus.OK).body(tradingService.buyingStocks(tradeRequestVO));
+    public ResponseEntity<String> placeOrder(@RequestBody TradeOrderRequestDto tradeOrderRequestDto) throws NoSuchElementException, IllegalArgumentException {
+        if (tradeOrderRequestDto.isBuying()) {
+            return ResponseEntity.status(HttpStatus.OK).body(tradingService.buyingStocks(tradeOrderRequestDto));
         } else {
-            return ResponseEntity.status(HttpStatus.OK).body(tradingService.sellingStocks(tradeRequestVO));
+            return ResponseEntity.status(HttpStatus.OK).body(tradingService.sellingStocks(tradeOrderRequestDto));
         }
     }
 
