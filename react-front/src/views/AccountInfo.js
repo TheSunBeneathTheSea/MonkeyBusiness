@@ -1,23 +1,55 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components/macro";
 
-const AccountInfo = ({ account, getAccount }) => {
+const AccountInfo = ({ account, competition }) => {
   return (
-    <Container>
-      <DataBox key={account.id}>
-        <p>Account</p>
-        <Paragraph>user_id: {account.user_id}</Paragraph>
-        <Paragraph>ticker: {account.ticker}</Paragraph>
-        <Paragraph>company name: {account.companyName}</Paragraph>
-        <Paragraph>current price: {account.currentPrice}</Paragraph>
-        <Paragraph>buying price: {account.buyingPrice}</Paragraph>
-        <Paragraph>take profit point: {account.takeProfitPoint}</Paragraph>
-        <Paragraph>stop loss point: {account.stopLossPoint}</Paragraph>
-        <Paragraph>holding amount: {account.holdingAmount}</Paragraph>
-        <Paragraph>points: {account.points}</Paragraph>
-        <Paragraph>capital: {account.capital}</Paragraph>
-      </DataBox>
-    </Container>
+    <>
+      <Container>
+        <Table>
+          <thead>
+            <tr>
+              <th>대회 ID</th>
+              <th>대회 이름</th>
+              <th>계좌 평가 금액</th>
+              <th>계좌 보유 현금</th>
+              <th>거래 이력</th>
+              <th>계좌 포트폴리오</th>
+              <th>계좌 거래</th>
+            </tr>
+          </thead>
+          <tbody>
+            {competition &&
+              account.map((account, idx) => (
+                <tr key={idx}>
+                  <td>{account.competitionId}</td>
+                  <td>
+                    {account.competitionId === 0
+                      ? "기본 계좌"
+                      : competition.find((c) => c.id === account.competitionId)
+                          .name}
+                  </td>
+                  <td>{account.capital}</td>
+                  <td>{account.points}</td>
+                  <td>
+                    <Link to={`logs/${account.competitionId}`}>이력 확인</Link>
+                  </td>
+                  <td>
+                    <Link to={`portfolio/${account.competitionId}`}>
+                      포트폴리오 확인
+                    </Link>
+                  </td>
+                  <td>
+                    <Link to={`/competition/${account.competitionId}`}>
+                      거래하기
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </Table>
+      </Container>
+    </>
   );
 };
 
@@ -30,16 +62,11 @@ const Container = styled.div`
   justify-content: center;
 `;
 
-const DataBox = styled.div`
-  width: 90%;
-  text-align: left;
-  border-style: outset;
-  border-color: blue;
-  pading: 0px;
-  margin: 5px 1px;
-  box-sizing: border-box;
-`;
-
-const Paragraph = styled.p`
-  margin: 3px;
+const Table = styled.table`
+  border: 1px solid;
+  td,
+  th {
+    padding: 5px;
+    border: 1px solid;
+  }
 `;
