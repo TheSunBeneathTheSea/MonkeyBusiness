@@ -40,7 +40,7 @@ const Portfolio = ({ userId, backAPI }) => {
             <th>현재가</th>
             <th>보유량</th>
             <th>손익</th>
-            <th>총액</th>
+            <th>가치</th>
           </tr>
         </thead>
         <tbody>

@@ -40,9 +40,7 @@ const AccountInfo = ({ account, competition }) => {
                     </Link>
                   </td>
                   <td>
-                    <Link to={`/competition/${account.competitionId}`}>
-                      거래하기
-                    </Link>
+                    <Link to={`/trade/${account.competitionId}`}>거래하기</Link>
                   </td>
                 </tr>
               ))}

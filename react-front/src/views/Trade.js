@@ -1,35 +1,53 @@
 import React, { useState, useEffect } from "react";
+import { Outlet, useParams } from "react-router-dom";
 import axios from "axios";
-import { Routes, Route, Link, useParams } from "react-router-dom";
 import styled from "styled-components/macro";
-import Order from "./Order";
+import OrderButton from "./OrderButton";
+import useStock from "../utils/useStock";
 
 const Trade = ({ backAPI }) => {
   const userId = "2498cd4b-3124-4231-a008-9ede7c47abb4";
+  const compId = useParams().competitionId;
 
-  const stockAPI = backAPI + "/stock";
-  const [stockInfo, setStockInfo] = useState([]);
-  let params = useParams();
-  const compId = params.competitionId;
-  console.log(compId);
+  const { stockInfo, isLoading } = useStock();
+  const pfAPI = backAPI + "/portfolio";
+  const [pfs, setPfs] = useState([]);
+  const [pfList, setPfList] = useState([]);
+
+  const [orderOpened, setOrderOpened] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
-    getStockInfo(stockAPI)
+    getPfs(pfAPI)
       .then((response) => response[0].data)
       .then((data) => {
-        if (isMounted) setStockInfo(data);
+        if (isMounted) {
+          setPfs(data);
+          setPfList(data.map((stock) => stock.stockInfo.ticker));
+        }
       });
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [stockInfo]);
 
-  const getStockInfo = async (request) => {
-    let stockInfo = [];
-    stockInfo = stockInfo.concat(await axios.get(request));
-    return stockInfo;
+  const getPfs = async (request) => {
+    let pf = [];
+    pf = pf.concat(
+      await axios.get(request, {
+        params: { userId: userId, competitionId: compId },
+      })
+    );
+    return pf;
   };
+
+  const own = stockInfo
+    ? stockInfo.data.filter((stock) => pfList.includes(stock.ticker))
+    : null;
+  const notOwn = stockInfo
+    ? stockInfo.data.filter((stock) => !pfList.includes(stock.ticker))
+    : null;
+
   return (
     <>
       <Container>
@@ -45,8 +63,8 @@ const Trade = ({ backAPI }) => {
             </tr>
           </thead>
           <tbody>
-            {stockInfo &&
-              stockInfo.map((stock, idx) => (
+            {own &&
+              own.map((stock, idx) => (
                 <tr key={idx}>
                   <td>{stock.ticker}</td>
                   <td>{stock.companyName}</td>
@@ -65,7 +83,64 @@ const Trade = ({ backAPI }) => {
                     {stock.currentPrice - stock.openPrice}
                   </td>
                   <td>
-                    <Link to="order">거래하기</Link>
+                    {
+                      <OrderButton
+                        backAPI={backAPI}
+                        isBuying={true}
+                        pf={null}
+                        ticker={stock.ticker}
+                        compId={compId}
+                        orderOpened={orderOpened}
+                        setOrderOpened={setOrderOpened}
+                      />
+                    }
+                    {
+                      <OrderButton
+                        backAPI={backAPI}
+                        isBuying={false}
+                        pf={pfs.find(
+                          (p) => p.stockInfo.ticker === stock.ticker
+                        )}
+                        ticker={stock.ticker}
+                        compId={compId}
+                        orderOpened={orderOpened}
+                        setOrderOpened={setOrderOpened}
+                      />
+                    }
+                  </td>
+                </tr>
+              ))}
+            {notOwn &&
+              notOwn.map((stock, idx) => (
+                <tr key={idx}>
+                  <td>{stock.ticker}</td>
+                  <td>{stock.companyName}</td>
+                  <td>{stock.openPrice}</td>
+                  <td>{stock.currentPrice}</td>
+                  <td
+                    style={{
+                      color:
+                        stock.openPrice < stock.currentPrice
+                          ? "red"
+                          : stock.openPrice > stock.currentPrice
+                          ? "blue"
+                          : "black",
+                    }}
+                  >
+                    {stock.currentPrice - stock.openPrice}
+                  </td>
+                  <td>
+                    {
+                      <OrderButton
+                        backAPI={backAPI}
+                        isBuying={true}
+                        pf={null}
+                        ticker={stock.ticker}
+                        compId={compId}
+                        orderOpened={orderOpened}
+                        setOrderOpened={setOrderOpened}
+                      />
+                    }
                   </td>
                 </tr>
               ))}
@@ -73,11 +148,9 @@ const Trade = ({ backAPI }) => {
         </Table>
       </Container>
       {/* <Routes>
-        <Route
-          path=":competitionId"
-          element={<Order userId={userId} backAPI={backAPI} />}
-        />
+        <Route path="order" element={<OrderBu backAPI={backAPI} />} />
       </Routes> */}
+      <Outlet />
     </>
   );
 };

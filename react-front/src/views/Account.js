@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, Outlet } from "react-router-dom";
 import styled from "styled-components/macro";
 import AccountInfo from "./AccountInfo";
 import TradeLogs from "./TradeLogs";
@@ -85,6 +85,7 @@ const Account = ({ backAPI }) => {
               />
             </Route>
           </Routes>
+          <Outlet />
         </>
       )}
     </>

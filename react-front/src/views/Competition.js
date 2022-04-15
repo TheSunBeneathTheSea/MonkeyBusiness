@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link, Outlet } from "react-router-dom";
+import { Routes, Route, Link, Outlet } from "react-router-dom";
 import styled from "styled-components/macro";
+import Ranking from "./Ranking";
+import NewCompetition from "./NewCompetition";
 
 const Competition = ({ backAPI }) => {
   const compAPI = backAPI + "/competition";
   const partAPI = backAPI + "/participant";
   const [competition, setCompetition] = useState([]);
   const userId = "2498cd4b-3124-4231-a008-9ede7c47abb4";
+
+  //권한 인증 필요
+  const isAdmin = true;
 
   useEffect(() => {
     let isMounted = true;
@@ -29,7 +34,6 @@ const Competition = ({ backAPI }) => {
 
   const enrollHandler = (event) => {
     event.preventDefault();
-    console.log(event);
     let msg =
       "대회에 참가하시면 대회 전용 계좌가 생성되며,\n대회가 종료되면 전용 계좌는 자동 삭제됩니다.\n참가하시겠습니까?";
     if (window.confirm(msg)) {
@@ -96,17 +100,35 @@ const Competition = ({ backAPI }) => {
                     )}
                   </td>
                   <td>
-                    {comp.active
-                      ? "실시간 랭킹"
-                      : new Date(comp.start) > new Date()
-                      ? ""
-                      : "최종 순위"}
+                    {comp.active ? (
+                      <Link to={`ranking/${comp.id}`}>현재 순위</Link>
+                    ) : new Date(comp.start) > new Date() ? (
+                      ""
+                    ) : (
+                      <Link to={`ranking/${comp.id}`}>최종 순위</Link>
+                    )}
                   </td>
                 </tr>
               ))}
           </tbody>
         </Table>
       </Container>
+      {isAdmin && (
+        <Container>
+          <ItemBox>
+            <Item to="new">대회 개최</Item>
+          </ItemBox>
+        </Container>
+      )}
+      <Routes>
+        <Route path="new" element={<NewCompetition backAPI={backAPI} />} />
+        <Route path="ranking">
+          <Route
+            path=":competitionId"
+            element={<Ranking backAPI={backAPI} competition={competition} />}
+          />
+        </Route>
+      </Routes>
       <Outlet />
     </>
   );
