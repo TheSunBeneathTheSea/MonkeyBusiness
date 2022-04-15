@@ -13,7 +13,7 @@ import java.io.IOException;
 public class UpdateStockScheduler {
     private final StockUpdateService stockUpdateService;
 
-    @Scheduled(cron = "15 0 9 ? * 1-5")
+    @Scheduled(cron = "3/15 0 9 ? * 1-5")
     public void openMarket() throws IOException, Exception {
         stockUpdateService.updateStocks(true);
     }
@@ -22,7 +22,7 @@ public class UpdateStockScheduler {
 //            @Scheduled(cron = "15 0/2 9-14 ? * 1-5"),
 //            @Scheduled(cron = "15 0-30/2 15 ? * 1-5")
 //    })
-    @Scheduled(cron = "0/15 * * ? * 1-5")
+    @Scheduled(cron = "3/15 * * ? * 1-5")
     public void updateStock() throws IOException, Exception {
         stockUpdateService.updateStocks(false);
     }
