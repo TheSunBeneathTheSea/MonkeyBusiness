@@ -5,15 +5,13 @@ import time
 import os
 import pandas as pd
 
-df = pd.DataFrame()
-sise = []
 
-def get_info():
+def get_info(sise):
         pages = list(range(1, 21))
         for idx in pages:
-            get_page(idx)
+            get_page(idx, sise)
 
-def get_page(pageNumber):
+def get_page(pageNumber, sise):
     # url = 'https://www.google.com/finance/quote/' + code + ':KRX'
     # url = 'https://finance.naver.com/item/main.nhn?code=' + code
     url = 'https://finance.naver.com/sise/entryJongmok.naver?&page=' + str(pageNumber)
@@ -27,6 +25,8 @@ def get_page(pageNumber):
 
 def crawl():
     start = time.time()
+    df = []
+    sise = []
     company_dict = {}
     result_list = []
 
@@ -35,7 +35,7 @@ def crawl():
     for line in file.itertuples(index=False):
         company_dict[line[1]] = line[0]
 
-    get_info()
+    get_info(sise)
 
     for info in sise:
         result_list.append([company_dict[info[0]], info[0], info[1].replace(",", "")])
@@ -56,7 +56,7 @@ def crawl():
 if __name__ == "__main__":
     sched = BlockingScheduler()               
         
-    sched.add_job(crawl, trigger='cron', second='0', minute='0/2', hour='9-14', day_of_week='mon-fri', month="*")    
-    sched.add_job(crawl, trigger='cron', second='0', minute='0-24/2', hour='15', day_of_week='mon-fri', month="*")
+    sched.add_job(crawl, trigger='cron', second='0/15', minute='*', hour='9-14', day_of_week='mon-fri', month="*")    
+    sched.add_job(crawl, trigger='cron', second='0/15', minute='0-30/1', hour='15', day_of_week='mon-fri', month="*")
 
     sched.start()
