@@ -37,7 +37,7 @@ const Account = ({ backAPI }) => {
 
   const getAccount = async (request) => {
     let account = [];
-    account = await axios.get(request, { params: { userId: userId } });
+    account = await axios.get(request);
     return account;
   };
 

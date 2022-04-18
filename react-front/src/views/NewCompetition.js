@@ -37,7 +37,7 @@ const NewCompetition = ({ backAPI }) => {
         window.alert("성공");
       })
       .catch((err) => window.alert(err.response.data.message));
-    window.location.reload();
+    window.location.replace(window.location.href);
   };
 
   return (

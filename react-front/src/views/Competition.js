@@ -45,7 +45,6 @@ const Competition = ({ backAPI }) => {
 
   const enroll = async (compid) => {
     const requestDto = {
-      userId: userId,
       competitionId: compid,
     };
     await axios
