@@ -7,26 +7,25 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class AccountService {
+
     private final AccountRepository accountRepository;
+
     private final PortfolioRepository portfolioRepository;
 
     @Transactional
-    public String createAccount(AccountSaveRequestDto requestDto) {
+    public Account createAccount(AccountSaveRequestDto requestDto) {
         AccountId id = new AccountId(requestDto.getUserId(), 0L);
-        if(accountRepository.existsById(id)){
+
+        if (accountRepository.existsById(id)) {
             throw new IllegalArgumentException("user: " + requestDto.getUserId() + " already have base account");
         }
-        Account account = Account.builder()
+        return accountRepository.save(Account.builder()
                 .id(id)
                 .nickname(requestDto.getNickname())
-                .build();
-
-        accountRepository.save(account);
-
-        return "create account for nickname: " + account.getNickname();
+                .build());
     }
 
     @Transactional
