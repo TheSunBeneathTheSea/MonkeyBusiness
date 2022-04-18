@@ -1,5 +1,6 @@
 package monkey
 
+import monkey.config.auth.dto.User
 import monkey.controller.CompetitionController
 import monkey.domain.account.Account
 import monkey.domain.account.AccountId
@@ -133,14 +134,14 @@ class CompetitionServiceSpec extends Specification{
         Long compId = competitionRepository.findCompetitionStartsToday().get(0)
 
         when:
-        AccountId id1 = new AccountId("aaa", compId)
-        AccountId id2 = new AccountId("bbb", compId)
-        AccountId id3 = new AccountId("ccc", compId)
-        AccountId id4 = new AccountId("ddd", compId)
-        competitionController.enrollParticipant(id1)
-        competitionController.enrollParticipant(id2)
-        competitionController.enrollParticipant(id3)
-        competitionController.enrollParticipant(id4)
+        User user1 = User.of("aaa", "name1")
+        User user2 = User.of("bbb", "name1")
+        User user3 = User.of("ccc", "name1")
+        User user4 = User.of("ddd", "name1")
+        competitionController.enrollParticipant(user1, compId)
+        competitionController.enrollParticipant(user2, compId)
+        competitionController.enrollParticipant(user3, compId)
+        competitionController.enrollParticipant(user4, compId)
 
         then:
         accountRepository.findAllByCompetitionId(compId).size() == 4
@@ -179,18 +180,14 @@ class CompetitionServiceSpec extends Specification{
         //competition progress
         //everyone buy same stock on same price
         TradeOrderRequestDto tradeRequestVO = new TradeOrderRequestDto()
-        tradeRequestVO.setUserId("aaa")
         tradeRequestVO.setCompetitionId(compId)
         tradeRequestVO.setAmount(10)
         tradeRequestVO.setBuying(true)
         tradeRequestVO.setTicker("001")
-        tradingService.buyingStocks(tradeRequestVO)
-        tradeRequestVO.setUserId("bbb")
-        tradingService.buyingStocks(tradeRequestVO)
-        tradeRequestVO.setUserId("ccc")
-        tradingService.buyingStocks(tradeRequestVO)
-        tradeRequestVO.setUserId("ddd")
-        tradingService.buyingStocks(tradeRequestVO)
+        tradingService.buyingStocks("aaa", tradeRequestVO)
+        tradingService.buyingStocks("bbb", tradeRequestVO)
+        tradingService.buyingStocks("ccc", tradeRequestVO)
+        tradingService.buyingStocks("ddd", tradeRequestVO)
 
         //but sell different time
         StockInfo s = stockInfoRepository.getById("001")
@@ -198,19 +195,15 @@ class CompetitionServiceSpec extends Specification{
         stockInfoRepository.save(s)
         tradeRequestVO.setBuying(false)
         //aaa earn 5000
-        tradeRequestVO.setUserId("aaa")
-        tradingService.sellingStocks(tradeRequestVO)
+        tradingService.sellingStocks("aaa", tradeRequestVO)
         //bbb earn 5000
-        tradeRequestVO.setUserId("bbb")
-        tradingService.sellingStocks(tradeRequestVO)
+        tradingService.sellingStocks("bbb", tradeRequestVO)
         //ccc earn 5010
         s.updateCurrentPrice(1501)
-        tradeRequestVO.setUserId("ccc")
-        tradingService.sellingStocks(tradeRequestVO)
+        tradingService.sellingStocks("ccc", tradeRequestVO)
         //ddd earn 10000
         s.updateCurrentPrice(2000)
-        tradeRequestVO.setUserId("ddd")
-        tradingService.sellingStocks(tradeRequestVO)
+        tradingService.sellingStocks("ddd", tradeRequestVO)
     }
 
     @Transactional

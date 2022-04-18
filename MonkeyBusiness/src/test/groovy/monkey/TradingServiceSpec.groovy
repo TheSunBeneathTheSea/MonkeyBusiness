@@ -59,7 +59,6 @@ class TradingServiceSpec extends Specification {
         tradeOrderRequestDto.setTicker("001")
         tradeOrderRequestDto.setCompetitionId(0L)
         tradeOrderRequestDto.setBuying(true)
-        tradeOrderRequestDto.setUserId("aaa")
         tradeOrderRequestDto.setAmount(10)
     }
 
@@ -70,7 +69,7 @@ class TradingServiceSpec extends Specification {
         tradeOrderRequestDto.setAmount(amount)
 
         when:
-        tradingService.buyingStocks(tradeOrderRequestDto)
+        tradingService.buyingStocks("aaa", tradeOrderRequestDto)
         value = portfolioRepository.getPortfolioByAccountIdAndTicker("aaa", ticker).get().calculateValue()
 
         then:
@@ -91,11 +90,10 @@ class TradingServiceSpec extends Specification {
     def "일반 매수 실패"() {
         given:
         tradeOrderRequestDto.setTicker(ticker)
-        tradeOrderRequestDto.setUserId(account)
         tradeOrderRequestDto.setAmount(amount)
 
         when:
-        tradingService.buyingStocks(tradeOrderRequestDto)
+        tradingService.buyingStocks(account, tradeOrderRequestDto)
 
         then:
         thrown(exception)
@@ -118,11 +116,11 @@ class TradingServiceSpec extends Specification {
 
 
         when:
-        tradingService.buyingStocks(tradeOrderRequestDto)
+        tradingService.buyingStocks("aaa", tradeOrderRequestDto)
         stockInfo.updateCurrentPrice(nextPrice)
         stockInfoRepository.save(stockInfo)
         tradeOrderRequestDto.setAmount(7)
-        tradingService.buyingStocks(tradeOrderRequestDto)
+        tradingService.buyingStocks("aaa", tradeOrderRequestDto)
 
         then:
         portfolioRepository.getPortfolioByAccountIdAndTicker("aaa", "test").get().getBuyingPrice() == result
@@ -140,12 +138,12 @@ class TradingServiceSpec extends Specification {
         given:
         tradeOrderRequestDto.setAmount(buy)
 
-        tradingService.buyingStocks(tradeOrderRequestDto)
+        tradingService.buyingStocks("aaa", tradeOrderRequestDto)
 
         when:
         tradeOrderRequestDto.setBuying(false)
         tradeOrderRequestDto.setAmount(sell)
-        tradingService.sellingStocks(tradeOrderRequestDto)
+        tradingService.sellingStocks("aaa", tradeOrderRequestDto)
 
         then:
         accountRepository.findAccountById("aaa", 0L).getPoints() == points
@@ -163,9 +161,9 @@ class TradingServiceSpec extends Specification {
     @Transactional
     def "전량 매도"() {
         given:
-        tradingService.buyingStocks(tradeOrderRequestDto)
+        tradingService.buyingStocks("aaa", tradeOrderRequestDto)
 
-        tradingService.sellingStocks(tradeOrderRequestDto)
+        tradingService.sellingStocks("aaa", tradeOrderRequestDto)
 
         expect:
         accountRepository.findAccountById("aaa", 0L).getPoints() == 1000000L
@@ -174,15 +172,11 @@ class TradingServiceSpec extends Specification {
 
     @Transactional
     def "매도 실패"() {
-        given:
-        tradingService.buyingStocks(tradeOrderRequestDto)
-
-        tradeOrderRequestDto.setUserId(account)
+        when:
+        tradingService.buyingStocks(account, tradeOrderRequestDto)
         tradeOrderRequestDto.setTicker(ticker)
         tradeOrderRequestDto.setAmount(amount)
-
-        when:
-        tradingService.sellingStocks(tradeOrderRequestDto)
+        tradingService.sellingStocks(account, tradeOrderRequestDto)
 
         then:
         thrown(exception)

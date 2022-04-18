@@ -5,8 +5,6 @@ import monkey.domain.account.Portfolio;
 
 @Data
 public class TradeRequestDto {
-    private String userId;
-
     private Long competitionId;
 
     private boolean buying;
@@ -16,7 +14,6 @@ public class TradeRequestDto {
     private int amount;
 
     public TradeRequestDto(TradeOrderRequestDto vo, Portfolio portfolio) {
-        this.userId = vo.getUserId();
         this.competitionId = vo.getCompetitionId();
         this.buying = vo.isBuying();
         this.portfolio = portfolio;

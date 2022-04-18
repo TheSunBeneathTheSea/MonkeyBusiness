@@ -1,6 +1,8 @@
 package monkey.controller;
 
 import lombok.RequiredArgsConstructor;
+import monkey.config.auth.LoginUser;
+import monkey.config.auth.dto.User;
 import monkey.domain.account.AccountId;
 import monkey.domain.competition.*;
 import monkey.service.CompetitionService;
@@ -25,9 +27,9 @@ public class CompetitionController {
     }
 
     @PostMapping("/participant")
-    public ResponseEntity<AccountId> enrollParticipant(@RequestBody AccountId requestDto) {
+    public ResponseEntity<AccountId> enrollParticipant(@LoginUser User user, @RequestBody Long competitionId) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(competitionService.enrollParticipant(requestDto.getCompetitionId(), requestDto.getUserId()));
+                .body(competitionService.enrollParticipant(competitionId, user.getId()));
     }
 
     @GetMapping("/competition")

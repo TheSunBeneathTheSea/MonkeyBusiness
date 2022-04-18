@@ -20,7 +20,8 @@ public class TradingService {
     private final CompetitionRepository competitionRepository;
 
     @Transactional
-    public Long buyingStocks(TradeOrderRequestDto requestVO) throws NoSuchElementException, IllegalArgumentException {
+    public Long buyingStocks(String userId, TradeOrderRequestDto requestVO)
+            throws NoSuchElementException, IllegalArgumentException {
         if (!checkCompetitionActiveness(requestVO.getCompetitionId())) {
             throw new IllegalArgumentException("competition: " + requestVO.getCompetitionId() + " is not active");
         }
@@ -29,11 +30,11 @@ public class TradingService {
             throw new IllegalArgumentException("you cannot buy " + requestVO.getAmount() + " amount");
         }
 
-        AccountId id = new AccountId(requestVO.getUserId(), requestVO.getCompetitionId());
+        AccountId id = new AccountId(userId, requestVO.getCompetitionId());
         Account account = accountRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException(
                         "no such account for user id: "
-                                + requestVO.getUserId() + ", competition id: "
+                                + userId + ", competition id: "
                                 + requestVO.getCompetitionId()
                 ));
 
@@ -51,7 +52,7 @@ public class TradingService {
         }
 
         Portfolio portfolio = portfolioRepository
-                .getPortfolioByAccountIdAndTicker(requestVO.getUserId(), requestVO.getTicker())
+                .getPortfolioByAccountIdAndTicker(userId, requestVO.getTicker())
                 .orElse(Portfolio.builder()
                         .stockInfo(stockInfo)
                         .account(account)
@@ -70,7 +71,7 @@ public class TradingService {
     }
 
     @Transactional
-    public Long sellingStocks(TradeOrderRequestDto requestVO) {
+    public Long sellingStocks(String userId, TradeOrderRequestDto requestVO) {
         if (!checkCompetitionActiveness(requestVO.getCompetitionId())) {
             throw new IllegalArgumentException("competition: " + requestVO.getCompetitionId() + " is not active");
         }
@@ -79,16 +80,16 @@ public class TradingService {
             throw new IllegalArgumentException("you cannot sell " + requestVO.getAmount() + " amount");
         }
 
-        AccountId id = new AccountId(requestVO.getUserId(), requestVO.getCompetitionId());
+        AccountId id = new AccountId(userId, requestVO.getCompetitionId());
         Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("no such account id: " + requestVO.getUserId()));
+                .orElseThrow(() -> new NoSuchElementException("no such account id: " + userId));
         StockInfo stockInfo = stockInfoRepository.findById(requestVO.getTicker())
                 .orElseThrow(() -> new NoSuchElementException("no such stock ticker: " + requestVO.getTicker()));
 
         Portfolio portfolio = portfolioRepository
-                .getPortfolioByAccountIdAndTicker(requestVO.getUserId(), requestVO.getTicker())
+                .getPortfolioByAccountIdAndTicker(userId, requestVO.getTicker())
                 .orElseThrow(() -> new NullPointerException(
-                        "user: " + requestVO.getUserId() + "does not have ticker: " + requestVO.getTicker())
+                        "user: " + userId + "does not have ticker: " + requestVO.getTicker())
                 );
 
         TradeRequestDto requestDto = new TradeRequestDto(requestVO, portfolio);
