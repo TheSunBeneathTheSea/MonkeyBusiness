@@ -1,18 +1,14 @@
 package monkey.domain.competition;
 
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
+@RequiredArgsConstructor(staticName = "of")
 public class CompetitionCreateRequestDto {
-    private String name;
-    private LocalDate start;
-    private LocalDate end;
-
-    public CompetitionCreateRequestDto(String name, LocalDate start, LocalDate end) {
-        this.name = name;
-        this.start = start;
-        this.end = end;
-    }
+    private final String name;
+    private final LocalDate start;
+    private final LocalDate end;
 }

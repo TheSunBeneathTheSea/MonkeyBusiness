@@ -35,7 +35,8 @@ public class RankingService {
 
     @Transactional
     public List<RankingData> getRankingOfCompetition(Long competitionId) {
-        Competition competition = competitionRepository.findById(competitionId).orElseThrow(() -> new NoSuchElementException("no such competition"));
+        Competition competition = competitionRepository
+                .findById(competitionId).orElseThrow(() -> new NoSuchElementException("no such competition"));
 
         if(!competition.isActive()){
             return rankingRepository.findByCompetitionId(competitionId).getData();

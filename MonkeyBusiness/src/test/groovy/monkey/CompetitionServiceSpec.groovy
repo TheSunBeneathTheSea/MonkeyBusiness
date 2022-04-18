@@ -101,8 +101,8 @@ class CompetitionServiceSpec extends Specification{
     @Transactional
     def "대회 개최"() {
         given:
-        CompetitionCreateRequestDto requestDto = new CompetitionCreateRequestDto("testComp", LocalDate.now(), LocalDate.now())
-        CompetitionCreateRequestDto requestDto2 = new CompetitionCreateRequestDto("willBeDeleted", LocalDate.now(), LocalDate.now())
+        CompetitionCreateRequestDto requestDto = CompetitionCreateRequestDto.of("testComp", LocalDate.now(), LocalDate.now())
+        CompetitionCreateRequestDto requestDto2 = CompetitionCreateRequestDto.of("willBeDeleted", LocalDate.now(), LocalDate.now())
 
         when:
         ResponseEntity<String> response = competitionController.createCompetition(requestDto)

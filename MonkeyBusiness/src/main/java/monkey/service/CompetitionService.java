@@ -19,7 +19,7 @@ public class CompetitionService {
     private final AccountRepository accountRepository;
 
     @Transactional
-    public String createCompetition(CompetitionCreateRequestDto requestDto) {
+    public Long createCompetition(CompetitionCreateRequestDto requestDto) {
         Competition competition = Competition.builder()
                 .name(requestDto.getName())
                 .start(requestDto.getStart())
@@ -28,7 +28,7 @@ public class CompetitionService {
 
         competitionRepository.save(competition);
 
-        return "competition: " + requestDto.getName() + " from: " + requestDto.getStart() + " to: " + requestDto.getEnd() + " created";
+        return competition.getId();
     }
 
     @Transactional
@@ -54,7 +54,8 @@ public class CompetitionService {
 
     @Transactional
     public Competition getCompetitionById(Long competitionId) {
-        return competitionRepository.findById(competitionId).orElseThrow(() -> new NoSuchElementException("no such competition"));
+        return competitionRepository.findById(competitionId)
+                .orElseThrow(() -> new NoSuchElementException("no such competition"));
     }
 
     @Transactional
@@ -69,12 +70,13 @@ public class CompetitionService {
 
     @Transactional
     public void deleteCompetition(Long competitionId) {
-        Competition competition = competitionRepository.findById(competitionId).orElseThrow(() -> new NoSuchElementException("no such competition"));
+        Competition competition = competitionRepository.findById(competitionId)
+                .orElseThrow(() -> new NoSuchElementException("no such competition"));
         competitionRepository.delete(competition);
     }
 
     @Transactional
-    public String enrollParticipant(Long competitionId, String userId) throws IllegalArgumentException {
+    public AccountId enrollParticipant(Long competitionId, String userId) throws IllegalArgumentException {
         Account check = accountRepository.findAccountById(userId, competitionId);
         if (!ObjectUtils.isEmpty(check)) {
             throw new IllegalArgumentException("already exists");
@@ -83,12 +85,10 @@ public class CompetitionService {
         if (ObjectUtils.isEmpty(baseAccount)) {
             throw new NullPointerException("user: " + userId + "does not exist");
         }
-        Competition competition = competitionRepository.findById(competitionId).orElseThrow(() -> new NoSuchElementException("no such competition"));
+        Competition competition = competitionRepository
+                .findById(competitionId).orElseThrow(() -> new NoSuchElementException("no such competition"));
 
-        AccountId accountId = AccountId.builder()
-                .userId(userId)
-                .competitionId(competitionId)
-                .build();
+        AccountId accountId = new AccountId(userId, competitionId);
         Account account = Account.builder()
                 .id(accountId)
                 .nickname(baseAccount.getNickname())
@@ -96,7 +96,7 @@ public class CompetitionService {
 
         accountRepository.save(account);
 
-        return "ID: " + account.getId().getUserId() + " nickname: " + account.getNickname() + " enrolled in competition: " + competition.getName();
+        return accountId;
     }
 
     @Transactional

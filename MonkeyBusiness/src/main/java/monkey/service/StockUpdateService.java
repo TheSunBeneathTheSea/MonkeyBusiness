@@ -27,7 +27,8 @@ public class StockUpdateService {
         String filePath = fileDir.getAbsolutePath();
         ObjectMapper mapper = new ObjectMapper();
 
-        List<StockUpdateDto> updateDtoList = Arrays.asList(mapper.readValue(Paths.get(filePath).toFile(), StockUpdateDto[].class));
+        List<StockUpdateDto> updateDtoList = Arrays
+                .asList(mapper.readValue(Paths.get(filePath).toFile(), StockUpdateDto[].class));
 
         Map<String, Object[]> map = new HashMap<>();
 
@@ -61,7 +62,9 @@ public class StockUpdateService {
                     stockInfoRepository.save(newStock);
                 }
             }else{
-               throw new IOException("stockinfo size: " + infoList.size() + " != updateDto size: " + updateDtoMap.size() + "does not match");
+               throw new IOException(
+                       "stockinfo size: " + infoList.size()
+                               + " != updateDto size: " + updateDtoMap.size() + "does not match");
             }
         }else{
             List<StockInfo> stockInfoList = stockInfoRepository.findAll();

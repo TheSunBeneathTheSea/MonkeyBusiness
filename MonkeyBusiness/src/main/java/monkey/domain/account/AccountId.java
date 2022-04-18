@@ -9,7 +9,6 @@ import javax.persistence.Embeddable;
 import java.io.Serializable;
 
 @Getter
-@NoArgsConstructor
 @EqualsAndHashCode
 @Embeddable
 public class AccountId implements Serializable {

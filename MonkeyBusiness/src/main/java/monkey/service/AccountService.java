@@ -55,8 +55,6 @@ public class AccountService {
 
     @Transactional
     public void deleteAccountInCompetition(Long competitionId) {
-//        List<Account> accountList = accountRepository.findAllByCompetitionId(competitionId);
-//        accountRepository.deleteAllInBatch(accountList);
         accountRepository.deleteAllAccountInCompetition(competitionId);
     }
 

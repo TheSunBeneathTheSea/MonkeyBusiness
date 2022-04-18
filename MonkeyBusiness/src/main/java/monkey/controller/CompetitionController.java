@@ -12,43 +12,41 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api/v1")
 public class CompetitionController {
     private final CompetitionService competitionService;
     private final RankingService rankingService;
 
-    @PostMapping("/api/v1/competition")
-    public ResponseEntity<String> createCompetition(@RequestBody CompetitionCreateRequestDto requestDto) {
-        String msg = competitionService.createCompetition(requestDto);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(msg);
+    @PostMapping("/competition")
+    public ResponseEntity<Long> createCompetition(@RequestBody CompetitionCreateRequestDto requestDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(competitionService.createCompetition(requestDto));
     }
 
-    @PostMapping("/api/v1/participant")
-    public ResponseEntity<String> enrollParticipant(@RequestBody AccountId requestDto) {
-        String msg = competitionService.enrollParticipant(requestDto.getCompetitionId(), requestDto.getUserId());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(msg);
+    @PostMapping("/participant")
+    public ResponseEntity<AccountId> enrollParticipant(@RequestBody AccountId requestDto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(competitionService.enrollParticipant(requestDto.getCompetitionId(), requestDto.getUserId()));
     }
 
-    @GetMapping("/api/v1/competition")
+    @GetMapping("/competition")
     public ResponseEntity<List<CompetitionVO>> getCompetitions() {
-        return ResponseEntity.status(HttpStatus.OK).body(CompetitionVO.transformList(competitionService.getCompetitions()));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(CompetitionVO.transformList(competitionService.getCompetitions()));
     }
 
-    @GetMapping("/api/v1/competition/{id}")
+    @GetMapping("/competition/{id}")
     public ResponseEntity<CompetitionVO> getCompetitionById(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(new CompetitionVO(competitionService.getCompetitionById(id)));
     }
 
-    @DeleteMapping("/api/v1/competition/{id}")
+    @DeleteMapping("/competition/{id}")
     public void deleteCompetition(@PathVariable Long id) {
         competitionService.deleteCompetition(id);
     }
 
-    @GetMapping("/api/v1/ranking/{competitionId}")
+    @GetMapping("/ranking/{competitionId}")
     public ResponseEntity<List<RankingData>> getRankingData(@PathVariable Long competitionId) {
         Competition competition = competitionService.getCompetitionById(competitionId);
 

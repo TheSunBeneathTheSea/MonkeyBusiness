@@ -20,7 +20,7 @@ public class TradingService {
     private final CompetitionRepository competitionRepository;
 
     @Transactional
-    public String buyingStocks(TradeOrderRequestDto requestVO) throws NoSuchElementException, IllegalArgumentException {
+    public Long buyingStocks(TradeOrderRequestDto requestVO) throws NoSuchElementException, IllegalArgumentException {
         if (!checkCompetitionActiveness(requestVO.getCompetitionId())) {
             throw new IllegalArgumentException("competition: " + requestVO.getCompetitionId() + " is not active");
         }
@@ -50,7 +50,8 @@ public class TradingService {
             throw new IllegalArgumentException("invalid stock price");
         }
 
-        Portfolio portfolio = portfolioRepository.getPortfolioByAccountIdAndTicker(requestVO.getUserId(), requestVO.getTicker())
+        Portfolio portfolio = portfolioRepository
+                .getPortfolioByAccountIdAndTicker(requestVO.getUserId(), requestVO.getTicker())
                 .orElse(Portfolio.builder()
                         .stockInfo(stockInfo)
                         .account(account)
@@ -60,16 +61,16 @@ public class TradingService {
 
         TradeRequestDto requestDto = new TradeRequestDto(requestVO, portfolio);
         TradingLogDto newLogDto = account.buyingStocks(requestDto);
+        TradingLog newLog = new TradingLog(account, newLogDto);
 
         portfolioRepository.save(portfolio);
-        tradingLogRepository.save(new TradingLog(account, newLogDto));
+        tradingLogRepository.save(newLog);
 
-        return "userId:" + requestVO.getUserId() + " buy " + newLogDto.getAmount()
-                + " share of: " + newLogDto.getCompanyName() + " at " + newLogDto.getBuyingPrice();
+        return newLog.getId();
     }
 
     @Transactional
-    public String sellingStocks(TradeOrderRequestDto requestVO) {
+    public Long sellingStocks(TradeOrderRequestDto requestVO) {
         if (!checkCompetitionActiveness(requestVO.getCompetitionId())) {
             throw new IllegalArgumentException("competition: " + requestVO.getCompetitionId() + " is not active");
         }
@@ -79,11 +80,16 @@ public class TradingService {
         }
 
         AccountId id = new AccountId(requestVO.getUserId(), requestVO.getCompetitionId());
-        Account account = accountRepository.findById(id).orElseThrow(() -> new NoSuchElementException("no such account id: " + requestVO.getUserId()));
-        StockInfo stockInfo = stockInfoRepository.findById(requestVO.getTicker()).orElseThrow(() -> new NoSuchElementException("no such stock ticker: " + requestVO.getTicker()));
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("no such account id: " + requestVO.getUserId()));
+        StockInfo stockInfo = stockInfoRepository.findById(requestVO.getTicker())
+                .orElseThrow(() -> new NoSuchElementException("no such stock ticker: " + requestVO.getTicker()));
 
-        Portfolio portfolio = portfolioRepository.getPortfolioByAccountIdAndTicker(requestVO.getUserId(), requestVO.getTicker())
-                .orElseThrow(() -> new NullPointerException("user: " + requestVO.getUserId() + "does not have ticker: " + requestVO.getTicker()));
+        Portfolio portfolio = portfolioRepository
+                .getPortfolioByAccountIdAndTicker(requestVO.getUserId(), requestVO.getTicker())
+                .orElseThrow(() -> new NullPointerException(
+                        "user: " + requestVO.getUserId() + "does not have ticker: " + requestVO.getTicker())
+                );
 
         TradeRequestDto requestDto = new TradeRequestDto(requestVO, portfolio);
         TradingLogDto newLogDto = account.sellingStocks(requestDto);
@@ -97,8 +103,7 @@ public class TradingService {
             portfolioRepository.save(portfolio);
         }
 
-        return "userId:" + requestVO.getUserId() + " " + " sell " + newLogDto.getAmount()
-                + " share of: " + newLogDto.getCompanyName() + " at " + newLogDto.getSellingPrice();
+        return newLog.getId();
     }
 
     @Transactional
