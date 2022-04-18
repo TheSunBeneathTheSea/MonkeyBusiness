@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import styled from "styled-components/macro";
 
 const Portfolio = ({ userId, backAPI }) => {
-  const pfAPI = backAPI + "/portfolio";
+  const pfAPI = backAPI + "/account/portfolio";
   const [pfs, setPfs] = useState([]);
   let params = useParams();
 

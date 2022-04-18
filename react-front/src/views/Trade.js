@@ -10,7 +10,7 @@ const Trade = ({ backAPI }) => {
   const compId = useParams().competitionId;
 
   const { stockInfo, isLoading } = useStock();
-  const pfAPI = backAPI + "/portfolio";
+  const pfAPI = backAPI + "/account/portfolio";
   const [pfs, setPfs] = useState([]);
   const [pfList, setPfList] = useState([]);
 
