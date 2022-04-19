@@ -1,36 +1,43 @@
 package monkey.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import monkey.domain.trading.StockInfo;
 import monkey.domain.trading.StockInfoRepository;
 import monkey.domain.trading.StockUpdateDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.*;
 
 @RequiredArgsConstructor
 @Service
 public class StockUpdateService {
     private final StockInfoRepository stockInfoRepository;
+    private final AmazonS3 amazonS3;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     public List<StockInfo> findAllStockInfoAsc() {
         return stockInfoRepository.findAll();
     }
 
     public Map<String, Object[]> getStockUpdateDtoMap() throws IOException {
-        File fileDir = new File("C:/crawled/data/price_now.json");
-        String filePath = fileDir.getAbsolutePath();
+        Map<String, Object[]> map = new HashMap<>();
+
+        S3Object o = amazonS3.getObject(new GetObjectRequest(bucket, "price_now.json"));
+        S3ObjectInputStream objectInputStream = o.getObjectContent();
         ObjectMapper mapper = new ObjectMapper();
 
         List<StockUpdateDto> updateDtoList = Arrays
-                .asList(mapper.readValue(Paths.get(filePath).toFile(), StockUpdateDto[].class));
-
-        Map<String, Object[]> map = new HashMap<>();
+                .asList(mapper.readValue(objectInputStream, StockUpdateDto[].class));
 
         for (StockUpdateDto updateDto : updateDtoList) {
             map.put(updateDto.getTicker(), new Object[]{updateDto.getCompanyName(), updateDto.getCurrentPrice()});
