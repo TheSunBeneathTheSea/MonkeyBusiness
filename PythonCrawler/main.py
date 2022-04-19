@@ -5,6 +5,12 @@ import time
 import os
 import pandas as pd
 
+s3 = os.environ.get('s3')
+key = os.environ.get('key')
+secret = os.environ.get('secret')
+
+aws_credentials = { "key": key, "secret": secret }
+
 
 def get_info(sise):
         pages = list(range(1, 21))
@@ -12,8 +18,6 @@ def get_info(sise):
             get_page(idx, sise)
 
 def get_page(pageNumber, sise):
-    # url = 'https://www.google.com/finance/quote/' + code + ':KRX'
-    # url = 'https://finance.naver.com/item/main.nhn?code=' + code
     url = 'https://finance.naver.com/sise/entryJongmok.naver?&page=' + str(pageNumber)
     result = requests.get(url)
     bs_obj = BeautifulSoup(result.content.decode('euc-kr', 'replace'), "lxml")
@@ -30,7 +34,8 @@ def crawl():
     company_dict = {}
     result_list = []
 
-    file = pd.read_excel('./data/kospi200.xlsx', usecols="A:B", dtype=str)
+    read_path = s3 + '/kospi200.xlsx'
+    file = pd.read_excel(read_path, usecols="A:B", dtype=str, storage_options=aws_credentials)
 
     for line in file.itertuples(index=False):
         company_dict[line[1]] = line[0]
@@ -43,20 +48,15 @@ def crawl():
     df = pd.DataFrame(list(result_list), columns=['ticker', 'companyName', 'currentPrice'])
     print(df)
 
-    file_path = 'C:/crawled/data/price_now.json'
-    if os.path.exists(file_path):
-        os.remove(file_path)
-    else:
-        os.makedirs(file_path, exist_ok=True)
-
-    df.to_json(file_path,
-               orient='records', force_ascii=False)
+    write_path = s3 + '/price_now.json'
+    df.to_json(write_path,
+               orient='records', force_ascii=False, storage_options=aws_credentials)
     print("timelapse : ", time.time() - start)
 
 if __name__ == "__main__":
     sched = BlockingScheduler()               
         
-    sched.add_job(crawl, trigger='cron', second='0/15', minute='*', hour='9-14', day_of_week='mon-fri', month="*")    
-    sched.add_job(crawl, trigger='cron', second='0/15', minute='0-30/1', hour='15', day_of_week='mon-fri', month="*")
+    sched.add_job(crawl, trigger='cron', second='0/10', minute='*', hour='9-14', day_of_week='mon-fri', month="*")    
+    sched.add_job(crawl, trigger='cron', second='0/10', minute='0-30/1', hour='15', day_of_week='mon-fri', month="*")
 
     sched.start()
