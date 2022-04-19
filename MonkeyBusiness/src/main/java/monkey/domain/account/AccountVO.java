@@ -1,6 +1,8 @@
 package monkey.domain.account;
 
 import lombok.Data;
+import org.springframework.util.ObjectUtils;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,7 +17,7 @@ public class AccountVO {
         this.userId = account.getId().getUserId();
         this.competitionId = account.getId().getCompetitionId();
         this.points = account.getPoints();
-        this.capital = account.getHoldingStocks().isEmpty() ? 0L : account.getTotalCapital();
+        this.capital = ObjectUtils.isEmpty(account.getHoldingStocks()) ? 0L : account.getTotalCapital();
     }
 
     public static List<AccountVO> transformList(List<Account> accountList) {
