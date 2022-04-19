@@ -9,7 +9,6 @@ const Competition = ({ backAPI }) => {
   const compAPI = backAPI + "/competition";
   const partAPI = backAPI + "/participant";
   const [competition, setCompetition] = useState([]);
-  const userId = "2498cd4b-3124-4231-a008-9ede7c47abb4";
 
   //권한 인증 필요
   const isAdmin = true;

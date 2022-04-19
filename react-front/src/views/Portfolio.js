@@ -3,7 +3,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import styled from "styled-components/macro";
 
-const Portfolio = ({ userId, backAPI }) => {
+const Portfolio = ({ backAPI }) => {
   const pfAPI = backAPI + "/account/portfolio";
   const [pfs, setPfs] = useState([]);
   let params = useParams();
@@ -24,7 +24,7 @@ const Portfolio = ({ userId, backAPI }) => {
     let pf = [];
     pf = pf.concat(
       await axios.get(request, {
-        params: { userId: userId, competitionId: params.competitionId },
+        params: { competitionId: params.competitionId },
       })
     );
     return pf;

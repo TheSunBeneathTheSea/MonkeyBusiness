@@ -5,7 +5,6 @@ import useStock from "../utils/useStock";
 
 const Order = ({ isBuying, pf, orderHandler, ticker, compId, backAPI }) => {
   const tradeAPI = backAPI + "/trade";
-  const userId = "2498cd4b-3124-4231-a008-9ede7c47abb4";
   const { stockInfo, isLoading } = useStock();
   const [targetStock, setTargetStock] = useState({});
   const [amount, setAmount] = useState();
@@ -23,7 +22,6 @@ const Order = ({ isBuying, pf, orderHandler, ticker, compId, backAPI }) => {
   const formHandler = async (event) => {
     event.preventDefault();
     const tradeOrderRequestDto = {
-      userId: userId,
       competitionId: compId,
       buying: isBuying,
       ticker: ticker,

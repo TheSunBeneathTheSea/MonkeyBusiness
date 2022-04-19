@@ -11,7 +11,6 @@ const Account = ({ backAPI }) => {
   const [competition, setCompetition] = useState([]);
   const accountAPI = backAPI + "/account";
   const competitionAPI = backAPI + "/competition";
-  const userId = "2498cd4b-3124-4231-a008-9ede7c47abb4";
 
   useEffect(() => {
     // 도커에 올릴때 ip 수정
@@ -73,15 +72,13 @@ const Account = ({ backAPI }) => {
             <Route path="logs">
               <Route
                 path=":competitionId"
-                element={<TradeLogs userId={userId} backAPI={backAPI} />}
+                element={<TradeLogs backAPI={backAPI} />}
               ></Route>
             </Route>
             <Route path="portfolio">
               <Route
                 path=":competitionId"
-                element={
-                  <Portfolio userId={account[0].userId} backAPI={backAPI} />
-                }
+                element={<Portfolio backAPI={backAPI} />}
               />
             </Route>
           </Routes>

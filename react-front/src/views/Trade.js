@@ -6,7 +6,6 @@ import OrderButton from "./OrderButton";
 import useStock from "../utils/useStock";
 
 const Trade = ({ backAPI }) => {
-  const userId = "2498cd4b-3124-4231-a008-9ede7c47abb4";
   const compId = useParams().competitionId;
 
   const { stockInfo, isLoading } = useStock();
@@ -35,7 +34,7 @@ const Trade = ({ backAPI }) => {
     let pf = [];
     pf = pf.concat(
       await axios.get(request, {
-        params: { userId: userId, competitionId: compId },
+        params: { competitionId: compId },
       })
     );
     return pf;

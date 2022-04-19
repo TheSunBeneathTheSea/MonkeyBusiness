@@ -3,7 +3,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import styled from "styled-components/macro";
 
-const TradeLogs = ({ userId, backAPI }) => {
+const TradeLogs = ({ backAPI }) => {
   const logsAPI = backAPI + "/logs";
   const [logs, setLogs] = useState([]);
   let params = useParams();
@@ -24,7 +24,7 @@ const TradeLogs = ({ userId, backAPI }) => {
     let logs = [];
     logs = logs.concat(
       await axios.get(request, {
-        params: { userId: userId, competitionId: params.competitionId },
+        params: { competitionId: params.competitionId },
       })
     );
     return logs;
