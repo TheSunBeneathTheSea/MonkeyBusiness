@@ -43,11 +43,9 @@ const Competition = ({ backAPI }) => {
   };
 
   const enroll = async (compid) => {
-    const requestDto = {
-      competitionId: compid,
-    };
+    const enrollAPI = partAPI + "/" + compid;
     await axios
-      .post(partAPI, requestDto)
+      .post(enrollAPI)
       .then(() => window.alert("성공했습니다"))
       .catch((err) => {
         window.alert(err.response.data.message);
