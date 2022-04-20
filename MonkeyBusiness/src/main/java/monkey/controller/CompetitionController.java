@@ -26,8 +26,8 @@ public class CompetitionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(competitionService.createCompetition(requestDto));
     }
 
-    @PostMapping("/participant")
-    public ResponseEntity<AccountId> enrollParticipant(@LoginUser User user, @RequestBody Long competitionId) {
+    @PostMapping("/participant/{competitionId}")
+    public ResponseEntity<AccountId> enrollParticipant(@LoginUser User user, @PathVariable Long competitionId) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(competitionService.enrollParticipant(competitionId, user.getId()));
     }
