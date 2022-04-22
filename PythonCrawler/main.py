@@ -11,7 +11,6 @@ secret = os.environ.get('secret')
 
 aws_credentials = { "key": key, "secret": secret }
 
-
 def get_info(sise):
         pages = list(range(1, 21))
         for idx in pages:
@@ -28,13 +27,14 @@ def get_page(pageNumber, sise):
         sise.append([ele for ele in cols if ele])
 
 def crawl():
+    print("crawling start at: " + time.localtime())
     start = time.time()
     df = []
     sise = []
     company_dict = {}
     result_list = []
 
-    read_path = s3 + '/kospi200.xlsx'
+    read_path = "s3://" + s3 + '/kospi200.xlsx'
     file = pd.read_excel(read_path, usecols="A:B", dtype=str, storage_options=aws_credentials)
 
     for line in file.itertuples(index=False):
@@ -48,13 +48,13 @@ def crawl():
     df = pd.DataFrame(list(result_list), columns=['ticker', 'companyName', 'currentPrice'])
     print(df)
 
-    write_path = s3 + '/price_now.json'
+    write_path = "s3://" + s3 + '/price_now.json'
     df.to_json(write_path,
                orient='records', force_ascii=False, storage_options=aws_credentials)
     print("timelapse : ", time.time() - start)
 
 if __name__ == "__main__":
-    sched = BlockingScheduler()               
+    sched = BlockingScheduler({'apscheduler.timezone':'Asia/seoul'})            
         
     sched.add_job(crawl, trigger='cron', second='0/10', minute='*', hour='9-14', day_of_week='mon-fri', month="*")    
     sched.add_job(crawl, trigger='cron', second='0/10', minute='0-30/1', hour='15', day_of_week='mon-fri', month="*")
