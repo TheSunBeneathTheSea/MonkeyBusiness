@@ -3,11 +3,12 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
     id 'groovy'
+    id 'com.google.cloud.tools.jib' version '3.2.1'
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+sourceCompatibility = '11'
 
 configurations {
     compileOnly {
@@ -25,6 +26,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'io.awspring.cloud:spring-cloud-aws:2.4.0'
     implementation 'io.awspring.cloud:spring-cloud-aws-context:2.4.0'
+    implementation 'com.google.cloud.tools:jib-maven-plugin:3.2.1'
     testImplementation 'org.springframework.security:spring-security-test'
     implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2',
@@ -39,10 +41,24 @@ dependencies {
     testImplementation('org.spockframework:spock-spring:2.1-groovy-3.0')
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
 jar {
     enabled(false)
+}
+
+jib {
+    from {
+        image = "openjdk:11-jdk-slim"
+    }
+//    to {
+//        image = project.findProperty("docker.repository") + "/" + project.findProperty("docker.image.name")
+//        tags = ["latest"]
+//        auth {
+//            username = project.findProperty("docker.repository.username")
+//            password = project.findProperty("docker.repository.password")
+//        }
+//    }
+    to {
+        image = "slowlight50/backend-stock"
+        tags = ["latest"]
+    }
 }
